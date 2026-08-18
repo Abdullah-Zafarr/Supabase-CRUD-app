@@ -49,12 +49,7 @@ st.markdown(
 
     /* Reset & Base */
     .stApp {
-        background:
-            radial-gradient(circle at 88% 8%, rgba(46, 116, 109, 0.10), transparent 23rem),
-            linear-gradient(rgba(21, 49, 58, 0.025) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(21, 49, 58, 0.025) 1px, transparent 1px),
-            var(--canvas) !important;
-        background-size: auto, 32px 32px, 32px 32px, auto !important;
+        background: var(--canvas) !important;
         color: var(--text-strong) !important;
         font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
@@ -83,18 +78,16 @@ st.markdown(
         gap: 0.8rem;
     }
     .brand-mark {
-        width: 31px;
-        height: 31px;
+        width: 24px;
+        height: 24px;
         background: var(--ocean);
         color: #F8F5EB;
-        border-radius: 50% 50% 50% 8px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: 'DM Mono', monospace;
-        font-size: 0.72rem;
-        transform: rotate(-8deg);
-        box-shadow: 3px 3px 0 var(--sand);
+        font-size: 0.58rem;
     }
     .brand-title {
         font-size: 1rem;
@@ -111,13 +104,9 @@ st.markdown(
     }
 
     .masthead {
-        display: grid;
-        grid-template-columns: minmax(0, 2.2fr) minmax(220px, 1fr);
-        gap: 2rem;
-        align-items: end;
-        padding: 3.4rem 0 2.4rem;
-        border-bottom: 1px solid var(--border-focus);
-        margin-bottom: 1.35rem;
+        padding: 0.65rem 0 0.45rem;
+        border-bottom: 0;
+        margin-bottom: 0.2rem;
     }
     .masthead-kicker {
         font-family: 'DM Mono', monospace;
@@ -130,7 +119,7 @@ st.markdown(
     }
     .masthead-title {
         color: var(--ocean);
-        font-size: clamp(2.6rem, 6vw, 5.2rem);
+        font-size: clamp(2rem, 4vw, 3rem);
         line-height: 0.9;
         letter-spacing: -0.065em;
         font-weight: 580;
@@ -174,29 +163,30 @@ st.markdown(
 
     /* List & Table Styling */
     .list-wrapper {
-        background: var(--surface);
-        border: 1px solid var(--border-focus);
-        border-radius: 2px 14px 2px 2px;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
         overflow: hidden;
-        box-shadow: 5px 5px 0 rgba(23, 63, 73, 0.07);
+        box-shadow: none;
     }
     .list-header {
         display: grid;
-        grid-template-columns: 3.2fr 0.9fr 0.8fr 1.3fr 1.6fr 1fr 0.7fr;
-        padding: 0.75rem 1.25rem;
-        background: var(--ocean);
+        grid-template-columns: 5.2fr 0.8fr 1.8fr 0.8fr 0.35fr;
+        padding: 0.55rem 0.4rem;
+        background: transparent;
+        border-top: 1px solid var(--border);
         border-bottom: 1px solid var(--border);
         font-family: 'DM Mono', monospace;
         font-size: 0.61rem;
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #DDE8E4;
+        color: var(--text-dim);
         align-items: center;
     }
     .file-row {
         display: grid;
-        grid-template-columns: 3.2fr 0.9fr 0.8fr 1.3fr 1.6fr 1fr 0.7fr;
+        grid-template-columns: 5.2fr 0.8fr 1.8fr 0.8fr 0.35fr;
         padding: 0.95rem 1.25rem;
         border-bottom: 1px solid var(--border);
         align-items: center;
@@ -222,16 +212,16 @@ st.markdown(
         font-size: 0.62rem;
         font-weight: 500;
         width: 34px;
-        height: 28px;
-        border-radius: 50% 50% 50% 4px;
+        height: auto;
+        border-radius: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         text-transform: uppercase;
         flex-shrink: 0;
-        border: 1px solid var(--border);
-        background: var(--sea-glass-bg);
-        color: var(--sea-glass);
+        border: 0;
+        background: transparent;
+        color: var(--text-dim);
     }
     .file-name-text {
         font-size: 0.85rem;
@@ -282,25 +272,25 @@ st.markdown(
     /* Clean Streamlit Overrides */
     div[data-testid="stPopover"] button,
     div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"] {
-        background: var(--surface) !important;
-        background-color: var(--surface) !important;
+        background: transparent !important;
+        background-color: transparent !important;
         background-image: none !important;
-        border: 1px solid var(--border-focus) !important;
+        border: 0 !important;
         color: var(--ocean) !important;
         -webkit-text-fill-color: var(--ocean) !important;
-        border-radius: 3px 10px 3px 3px !important;
+        border-radius: 3px !important;
         font-family: 'DM Mono', monospace !important;
         font-size: 0.68rem !important;
         font-weight: 500 !important;
-        padding: 0.32rem 0.65rem !important;
+        padding: 0.22rem 0.35rem !important;
         box-shadow: none !important;
-        min-height: 2.1rem !important;
+        min-height: 1.9rem !important;
     }
     div[data-testid="stPopover"] button:hover,
     div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"]:hover {
-        background: #E8E3D8 !important;
-        background-color: #E8E3D8 !important;
-        border-color: var(--ocean) !important;
+        background: rgba(21, 49, 58, 0.06) !important;
+        background-color: rgba(21, 49, 58, 0.06) !important;
+        border-color: transparent !important;
         color: var(--ocean) !important;
         -webkit-text-fill-color: var(--ocean) !important;
     }
@@ -371,6 +361,15 @@ st.markdown(
         font-size: 0.85rem;
     }
 
+    .index-count {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.61rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        padding: 0.15rem 0 0.1rem;
+    }
+
     /* Single-viewport shell */
     html,
     body,
@@ -395,21 +394,12 @@ st.markdown(
         gap: 0.35rem !important;
     }
     .masthead {
-        padding: 0.85rem 0 0.7rem !important;
-        margin: 0 0 0.45rem !important;
-        gap: 1.5rem !important;
-    }
-    .masthead-kicker {
-        margin-bottom: 0.3rem !important;
-        font-size: 0.61rem !important;
+        padding: 0.45rem 0 0.25rem !important;
+        margin: 0 !important;
     }
     .masthead-title {
-        font-size: clamp(2rem, 4.8vh, 3.25rem) !important;
-        line-height: 0.92 !important;
-    }
-    .masthead-note {
-        font-size: 0.78rem !important;
-        line-height: 1.35 !important;
+        font-size: clamp(1.8rem, 4vh, 2.6rem) !important;
+        line-height: 1 !important;
     }
     [data-testid="stExpander"] summary {
         min-height: 2.1rem !important;
@@ -468,23 +458,43 @@ def upload_to_temp(uploaded_file) -> Path:
         handle.close()
 
 
-def main() -> None:
-    # Top Bar
-    top_c1, top_c2 = st.columns([5, 1.2])
-    with top_c1:
-        st.markdown(
-            """
-            <div class="brand-cluster">
-                <div class="brand-mark">TF</div>
-                <span class="brand-title">Tideframe</span>
-                <span class="brand-meta">private object archive · documents</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
+def render_upload_popover(service: FileService) -> None:
+    """Render the complete create flow behind one quiet control."""
+    with st.popover("+", help="Add an object"):
+        uploaded_file = st.file_uploader(
+            "File",
+            type=["pdf", "png", "jpg", "jpeg", "webp", "gif", "txt", "csv", "json", "docx"],
+            help="PDF, images, plaintext, CSV, or JSON up to 10 MB",
         )
-    with top_c2:
-        if st.button("Refresh index", use_container_width=True):
-            st.rerun()
+        file_note = st.text_area("Field note", placeholder="Optional context", height=72)
+
+        if uploaded_file is not None and st.button("Archive", type="primary", use_container_width=True):
+            if uploaded_file.size > service.settings.max_file_size_bytes:
+                st.error(f"File exceeds {human_size(service.settings.max_file_size_bytes)}.")
+                return
+
+            temp_path = upload_to_temp(uploaded_file)
+            try:
+                with st.spinner("Validating…"):
+                    service.create_file(str(temp_path), description=file_note.strip() or None)
+                st.toast("Archived.", icon="✓")
+                st.rerun()
+            except Exception as error:
+                st.error(f"Upload rejected: {error}")
+            finally:
+                temp_path.unlink(missing_ok=True)
+
+
+def main() -> None:
+    st.markdown(
+        """
+        <div class="brand-cluster">
+            <div class="brand-mark">TF</div>
+            <span class="brand-title">Tideframe</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     try:
         service = get_service()
@@ -496,79 +506,30 @@ def main() -> None:
     st.markdown(
         """
         <section class="masthead">
-            <div>
-                <div class="masthead-kicker">Supabase · field storage</div>
-                <div class="masthead-title">Keep every signal.</div>
-            </div>
-            <div class="masthead-note">
-                A small, private registry for source files, evidence, and the notes
-                that make them useful later.
-            </div>
+            <div class="masthead-title">Archive.</div>
         </section>
         """,
         unsafe_allow_html=True,
     )
 
-    # Overlay uploader: opening it never increases the page height.
-    with st.popover("+ Add an object to the archive"):
-        col_up1, col_up2 = st.columns([3, 2])
-        with col_up1:
-            uploaded_file = st.file_uploader(
-                "Upload file",
-                type=["pdf", "png", "jpg", "jpeg", "webp", "gif", "txt", "csv", "json", "docx"],
-                help="Allowed: PDF, Images, Plaintext, CSV, JSON (up to 10 MB)",
-            )
-        with col_up2:
-            uploader_name = st.text_input("Uploader tag", value=service.settings.app_user)
-            file_note = st.text_area("Context note (optional)", placeholder="Add context or notes...", height=72)
-
-        if uploaded_file is not None:
-            if st.button("Validate & archive", type="primary"):
-                if uploaded_file.size > service.settings.max_file_size_bytes:
-                    st.error(f"File exceeds {human_size(service.settings.max_file_size_bytes)}.")
-                else:
-                    t_path = upload_to_temp(uploaded_file)
-                    try:
-                        with st.spinner("Uploading and validating with Edge Function..."):
-                            service.create_file(str(t_path), description=file_note.strip() or None)
-                        st.toast("File validated and archived.", icon="✓")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Upload rejected: {e}")
-                    finally:
-                        t_path.unlink(missing_ok=True)
-
-    st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
-
-    # Data & Filters
     records = service.list_files()
 
-    # Search & Filter bar
-    f1, f2, f3 = st.columns([4, 1.8, 1.8])
-    with f1:
-        search = st.text_input("Search", placeholder="Search filename, note, type...", label_visibility="collapsed").strip().lower()
-    with f2:
-        filter_status = st.selectbox("Status", ["All statuses", "active", "pending", "rejected"], label_visibility="collapsed")
-    with f3:
-        sort_order = st.selectbox("Sort", ["Newest first", "Oldest first", "Largest size", "Name A-Z"], label_visibility="collapsed")
+    search_col, add_col = st.columns([12, 0.55], vertical_alignment="center")
+    with search_col:
+        search = st.text_input(
+            "Search",
+            placeholder="Search the archive",
+            label_visibility="collapsed",
+        ).strip().lower()
+    with add_col:
+        render_upload_popover(service)
 
-    filtered = records
+    filtered = sorted(records, key=lambda item: str(item.get("created_at") or ""), reverse=True)
     if search:
         filtered = [
             r for r in filtered
             if search in f"{r.get('original_name', '')} {r.get('description', '')} {r.get('content_type', '')}".lower()
         ]
-    if filter_status != "All statuses":
-        filtered = [r for r in filtered if (r.get("status") or "").lower() == filter_status]
-
-    if sort_order == "Newest first":
-        filtered = sorted(filtered, key=lambda x: str(x.get("created_at") or ""), reverse=True)
-    elif sort_order == "Oldest first":
-        filtered = sorted(filtered, key=lambda x: str(x.get("created_at") or ""))
-    elif sort_order == "Largest size":
-        filtered = sorted(filtered, key=lambda x: int(x.get("size_bytes") or 0), reverse=True)
-    elif sort_order == "Name A-Z":
-        filtered = sorted(filtered, key=lambda x: str(x.get("original_name") or "").lower())
 
     if not filtered:
         st.markdown(
@@ -582,9 +543,9 @@ def main() -> None:
         return
 
     # Keep the shell within one viewport by paging instead of growing vertically.
-    page_size = 4
+    page_size = 5
     page_count = max(1, (len(filtered) + page_size - 1) // page_size)
-    filter_fingerprint = f"{search}|{filter_status}|{sort_order}"
+    filter_fingerprint = search
     if st.session_state.get("archive_filter") != filter_fingerprint:
         st.session_state.archive_filter = filter_fingerprint
         st.session_state.archive_page = 0
@@ -594,24 +555,30 @@ def main() -> None:
     page_records = filtered[page_start : page_start + page_size]
     page_end = page_start + len(page_records)
 
-    index_col, previous_col, next_col = st.columns([8, 0.65, 0.65], vertical_alignment="center")
-    with index_col:
+    if page_count == 1:
         st.markdown(
             f"""
-            <div style="font-family: 'DM Mono', monospace; font-size: 0.64rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-body);">
-                Objects {page_start + 1:02d}–{page_end:02d} / {len(filtered):02d}
+            <div class="index-count">
+                {len(filtered):02d} objects
             </div>
             """,
             unsafe_allow_html=True,
         )
-    with previous_col:
-        if st.button("←", key="archive_previous", disabled=current_page == 0, use_container_width=True):
-            st.session_state.archive_page = current_page - 1
-            st.rerun()
-    with next_col:
-        if st.button("→", key="archive_next", disabled=current_page >= page_count - 1, use_container_width=True):
-            st.session_state.archive_page = current_page + 1
-            st.rerun()
+    else:
+        index_col, previous_col, next_col = st.columns([10, 0.5, 0.5], vertical_alignment="center")
+        with index_col:
+            st.markdown(
+                f'<div class="index-count">{page_start + 1:02d}–{page_end:02d} / {len(filtered):02d}</div>',
+                unsafe_allow_html=True,
+            )
+        with previous_col:
+            if st.button("←", key="archive_previous", disabled=current_page == 0, use_container_width=True):
+                st.session_state.archive_page = current_page - 1
+                st.rerun()
+        with next_col:
+            if st.button("→", key="archive_next", disabled=current_page >= page_count - 1, use_container_width=True):
+                st.session_state.archive_page = current_page + 1
+                st.rerun()
 
     # Table Header
     st.markdown(
@@ -620,11 +587,9 @@ def main() -> None:
             <div class="list-header">
                 <div>Document</div>
                 <div>Size</div>
-                <div>Format</div>
-                <div>Uploader</div>
-                <div>Timestamp</div>
+                <div>Added</div>
                 <div>Status</div>
-                <div style="text-align: right;">Action</div>
+                <div></div>
             </div>
         </div>
         """,
@@ -637,7 +602,6 @@ def main() -> None:
         orig_name = r.get("original_name") or "unnamed"
         ext = Path(orig_name).suffix.lstrip(".") or "txt"
         size_str = human_size(r.get("size_bytes"))
-        uploader_str = r.get("uploaded_by") or "service-app"
         date_str = format_iso(r.get("created_at"))
         status_val = (r.get("status") or "pending").lower()
         desc = r.get("description")
@@ -651,7 +615,7 @@ def main() -> None:
 
         desc_html = f'<div class="file-desc-sub">{escape(desc)}</div>' if desc else '<div class="file-desc-sub" style="color: var(--text-subtle);">No field note</div>'
 
-        cols = st.columns([3.2, 0.9, 0.8, 1.3, 1.6, 1.0, 0.7])
+        cols = st.columns([5.2, 0.8, 1.8, 0.8, 0.35])
         with cols[0]:
             st.markdown(
                 f"""
@@ -668,15 +632,11 @@ def main() -> None:
         with cols[1]:
             st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-mono'>{size_str}</div>", unsafe_allow_html=True)
         with cols[2]:
-            st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-mono'>.{ext.lower()}</div>", unsafe_allow_html=True)
-        with cols[3]:
-            st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-data'>{escape(uploader_str)}</div>", unsafe_allow_html=True)
-        with cols[4]:
             st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-mono'>{date_str}</div>", unsafe_allow_html=True)
-        with cols[5]:
+        with cols[3]:
             st.markdown(f"<div style='padding-top: 0.45rem;'>{status_html}</div>", unsafe_allow_html=True)
-        with cols[6]:
-            action_popover = st.popover("Details", use_container_width=True)
+        with cols[4]:
+            action_popover = st.popover("···", use_container_width=True)
             with action_popover:
                 st.markdown(f"**{escape(orig_name)}**")
                 try:
