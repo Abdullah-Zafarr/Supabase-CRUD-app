@@ -129,7 +129,7 @@ supabase-files list
 
 ## Tideframe frontend
 
-The project also includes a minimal Streamlit interface called **Tideframe**. Its visual language is inspired by a coastal field station: bone paper, ocean ink, sea-glass status colors, and a restrained signal-orange accent. It provides searchable source records, field notes, validation status, and short-lived signed download links without turning the archive into a noisy admin dashboard.
+The project also includes a minimal Streamlit interface called **Tideframe**. It uses a warm archival-ledger visual system with numbered ingest and register sections, a compact upload well, neutral status text, and short-lived signed download links. The composition is intentionally distinct from a conventional blue SaaS file manager while keeping the workflow immediately understandable.
 
 Start it from the project folder:
 

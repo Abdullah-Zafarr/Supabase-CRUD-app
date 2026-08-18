@@ -432,6 +432,170 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Archival ledger treatment: inspired by clarity, not by the reference's visual system.
+st.markdown(
+    """
+    <style>
+    :root {
+        --canvas: #F3F0E8;
+        --surface: #FFFEFA;
+        --surface-soft: #ECE7DD;
+        --border: #D8D1C3;
+        --text-strong: #252C2D;
+        --text-body: #536164;
+        --text-dim: #7B8787;
+        --ocean: #263F43;
+        --signal: #B95E3E;
+    }
+
+    .stApp { background: var(--canvas) !important; }
+
+    [data-testid="stMainBlockContainer"],
+    .main .block-container {
+        max-width: 1220px !important;
+        padding-top: 1.45rem !important;
+    }
+
+    .brand-cluster { gap: 0.7rem !important; }
+    .brand-mark {
+        width: 31px !important;
+        height: 31px !important;
+        border-radius: 8px 8px 8px 2px !important;
+        background: var(--signal) !important;
+        font-size: 0.62rem !important;
+        box-shadow: 3px 3px 0 #D9C6B4;
+    }
+    .brand-copy {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.05;
+    }
+    .brand-title {
+        font-size: 1rem !important;
+        color: var(--text-strong) !important;
+    }
+    .brand-subtitle {
+        margin-top: 0.25rem;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.58rem;
+        color: var(--text-dim);
+        letter-spacing: 0.04em;
+    }
+
+    .st-key-ingest_panel {
+        margin-top: 0.85rem;
+        padding: 0.72rem 0.85rem 0.78rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--signal);
+        border-radius: 3px 13px 13px 13px;
+        box-shadow: 0 3px 12px rgba(55, 48, 39, 0.035);
+    }
+    .st-key-ingest_panel [data-testid="stVerticalBlock"] {
+        gap: 0.38rem !important;
+    }
+    .ingest-heading,
+    .register-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.58rem;
+        font-weight: 500;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+    }
+    .ingest-heading span:first-child,
+    .register-heading span:first-child {
+        color: var(--signal);
+    }
+    .st-key-ingest_panel [data-testid="stFileUploader"] section {
+        min-height: 4.3rem !important;
+        padding: 0.65rem 0.8rem !important;
+        background: #FAF8F2 !important;
+        border: 1px dashed #C8BFB0 !important;
+        border-radius: 8px !important;
+    }
+    .st-key-ingest_panel [data-testid="stFileUploader"] section:hover {
+        border-color: var(--signal) !important;
+    }
+    .st-key-ingest_panel [data-testid="stFileUploader"] button {
+        background: transparent !important;
+        color: var(--signal) !important;
+        border: 1px solid #CFA58F !important;
+        border-radius: 6px !important;
+    }
+
+    .register-heading {
+        justify-content: flex-start;
+        gap: 0.75rem;
+        padding-top: 0.3rem;
+        color: var(--text-strong);
+    }
+    .register-heading span:last-child {
+        padding: 0.1rem 0.42rem;
+        background: var(--surface-soft);
+        border-radius: 999px;
+        color: var(--text-body);
+    }
+
+    [data-testid="stTextInputRootElement"] {
+        background: var(--surface) !important;
+        border-color: var(--border) !important;
+        box-shadow: none !important;
+    }
+
+    .st-key-object_register {
+        padding: 0 0.75rem 0.25rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(55, 48, 39, 0.025);
+    }
+    .st-key-object_register > div > [data-testid="stVerticalBlock"] {
+        gap: 0 !important;
+    }
+    .list-header {
+        margin: 0 -0.75rem !important;
+        padding: 0.6rem 1.25rem !important;
+        background: var(--surface-soft) !important;
+        border: 0 !important;
+        border-bottom: 1px solid var(--border) !important;
+        color: var(--text-body) !important;
+    }
+    .file-name-block {
+        min-height: 2.55rem !important;
+        padding-left: 0.15rem !important;
+    }
+    .file-ext-icon {
+        width: 33px !important;
+        color: var(--signal) !important;
+    }
+    .file-name-text { color: var(--text-strong) !important; }
+    .status-active { color: var(--text-body) !important; }
+    .row-rule {
+        height: 1px;
+        background: var(--border);
+        margin: 0 -0.1rem;
+    }
+
+    .st-key-object_register div[data-testid="stPopover"] button {
+        color: var(--text-dim) !important;
+        -webkit-text-fill-color: var(--text-dim) !important;
+        font-size: 0.76rem !important;
+    }
+
+    @media (max-width: 780px) {
+        .ingest-heading span:last-child { display: none; }
+        .st-key-ingest_panel { margin-top: 0.45rem; }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Final layout layer: centered, calm, and deliberately sparse.
 st.markdown(
     """
@@ -563,6 +727,47 @@ st.markdown(
 )
 
 
+st.markdown(
+    """
+    <style>
+    :root {
+        --canvas: #F3F0E8;
+        --surface: #FFFEFA;
+        --surface-soft: #ECE7DD;
+        --border: #D8D1C3;
+        --text-strong: #252C2D;
+        --text-body: #536164;
+        --text-dim: #7B8787;
+        --ocean: #263F43;
+        --signal: #B95E3E;
+    }
+    .stApp { background: var(--canvas) !important; }
+    [data-testid="stMainBlockContainer"], .main .block-container {
+        max-width: 1220px !important;
+        padding-top: 1.45rem !important;
+    }
+    .brand-mark {
+        width: 31px !important;
+        height: 31px !important;
+        border-radius: 8px 8px 8px 2px !important;
+        background: var(--signal) !important;
+        box-shadow: 3px 3px 0 #D9C6B4 !important;
+    }
+    .list-header {
+        margin: 0 -0.75rem !important;
+        padding: 0.6rem 1.25rem !important;
+        background: var(--surface-soft) !important;
+        border: 0 !important;
+        border-bottom: 1px solid var(--border) !important;
+        color: var(--text-body) !important;
+    }
+    .file-ext-icon { color: var(--signal) !important; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
 @st.cache_resource
 def get_service() -> FileService:
     return FileService(Settings.from_env())
@@ -588,17 +793,39 @@ def upload_to_temp(uploaded_file) -> Path:
         handle.close()
 
 
-def render_upload_popover(service: FileService) -> None:
-    """Render the complete create flow behind one quiet control."""
-    with st.popover("New file"):
+def render_upload_panel(service: FileService) -> None:
+    """Render a compact, always-visible ingest surface."""
+    with st.container(key="ingest_panel"):
+        st.markdown(
+            """
+            <div class="ingest-heading">
+                <span>01 / Ingest</span>
+                <span>PDF · IMAGE · TEXT · DATA&nbsp;&nbsp; / &nbsp;&nbsp;10 MB MAX</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         uploaded_file = st.file_uploader(
-            "File",
+            "Drop a source file",
             type=["pdf", "png", "jpg", "jpeg", "webp", "gif", "txt", "csv", "json", "docx"],
             help="PDF, images, plaintext, CSV, or JSON up to 10 MB",
+            label_visibility="collapsed",
         )
-        file_note = st.text_area("Field note", placeholder="Optional context", height=72)
 
-        if uploaded_file is not None and st.button("Archive", type="primary", use_container_width=True):
+        if uploaded_file is None:
+            return
+
+        note_col, action_col = st.columns([5, 1], vertical_alignment="bottom")
+        with note_col:
+            file_note = st.text_input(
+                "Field note",
+                placeholder="Add context (optional)",
+                label_visibility="collapsed",
+            )
+        with action_col:
+            archive_clicked = st.button("Archive file", type="primary", use_container_width=True)
+
+        if archive_clicked:
             if uploaded_file.size > service.settings.max_file_size_bytes:
                 st.error(f"File exceeds {human_size(service.settings.max_file_size_bytes)}.")
                 return
@@ -619,8 +846,11 @@ def main() -> None:
     st.markdown(
         """
         <div class="brand-cluster">
-            <div class="brand-mark">TF</div>
-            <span class="brand-title">Tideframe</span>
+            <div class="brand-mark">T/</div>
+            <div class="brand-copy">
+                <span class="brand-title">Tideframe</span>
+                <span class="brand-subtitle">Supabase object register</span>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -633,27 +863,27 @@ def main() -> None:
         st.info("Check .env credentials.")
         st.stop()
 
-    st.markdown(
-        """
-        <section class="masthead">
-            <div class="masthead-title">Files</div>
-        </section>
-        """,
-        unsafe_allow_html=True,
-    )
+    render_upload_panel(service)
 
     records = service.list_files()
 
-    search_col, _, add_col = st.columns([4, 3, 1.15], vertical_alignment="center")
+    register_col, search_col = st.columns([5, 2.2], vertical_alignment="center")
+    with register_col:
+        st.markdown(
+            f"""
+            <div class="register-heading">
+                <span>02 / Object register</span>
+                <span>{len(records):02d}</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
     with search_col:
         search = st.text_input(
             "Search",
-            placeholder="Search the archive",
+            placeholder="Find an object",
             label_visibility="collapsed",
         ).strip().lower()
-    with add_col:
-        with st.container(key="new_file_control"):
-            render_upload_popover(service)
 
     filtered = sorted(records, key=lambda item: str(item.get("created_at") or ""), reverse=True)
     if search:
@@ -686,16 +916,7 @@ def main() -> None:
     page_records = filtered[page_start : page_start + page_size]
     page_end = page_start + len(page_records)
 
-    if page_count == 1:
-        st.markdown(
-            f"""
-            <div class="index-count">
-                {len(filtered):02d} objects
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    else:
+    if page_count > 1:
         index_col, previous_col, next_col = st.columns([10, 0.5, 0.5], vertical_alignment="center")
         with index_col:
             st.markdown(
@@ -712,7 +933,8 @@ def main() -> None:
                 st.rerun()
 
     # Table Header
-    st.markdown(
+    table_box = st.container(key="object_register")
+    table_box.markdown(
         """
         <div class="list-wrapper">
             <div class="list-header">
@@ -746,7 +968,7 @@ def main() -> None:
 
         desc_html = f'<div class="file-desc-sub">{escape(desc)}</div>' if desc else '<div class="file-desc-sub" style="color: var(--text-subtle);">No field note</div>'
 
-        cols = st.columns([5.2, 0.8, 1.8, 0.8, 0.35])
+        cols = table_box.columns([5.2, 0.8, 1.8, 0.8, 0.35])
         with cols[0]:
             st.markdown(
                 f"""
@@ -816,7 +1038,7 @@ def main() -> None:
                     except Exception as err:
                         st.error(str(err))
 
-        st.markdown("<div style='height: 1px; background: var(--border); margin: 0.15rem 0;'></div>", unsafe_allow_html=True)
+        table_box.markdown("<div class='row-rule'></div>", unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
