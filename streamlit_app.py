@@ -260,63 +260,53 @@ st.markdown(
         color: var(--text-dim);
     }
 
-    /* Status Pill */
-    .status-dot-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.72rem;
+    /* Restrained text-only status treatment */
+    .status-label {
+        display: inline-block;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.66rem;
         font-weight: 500;
-        padding: 0.15rem 0.5rem;
-        border-radius: 9999px;
-    }
-    .dot-active {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: var(--sea-glass);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
     }
     .status-active {
-        background: var(--sea-glass-bg);
-        color: #1E5C56;
-    }
-    .dot-pending {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: var(--sand);
+        color: var(--text-body);
     }
     .status-pending {
-        background: var(--sand-bg);
-        color: #72591F;
-    }
-    .dot-rejected {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: var(--signal);
+        color: #80662D;
     }
     .status-rejected {
-        background: var(--signal-bg);
         color: #A33D23;
     }
 
     /* Clean Streamlit Overrides */
-    div[data-testid="stPopover"] > button {
+    div[data-testid="stPopover"] button,
+    div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"] {
         background: var(--surface) !important;
+        background-color: var(--surface) !important;
+        background-image: none !important;
         border: 1px solid var(--border-focus) !important;
-        color: var(--text-body) !important;
-        border-radius: 999px !important;
+        color: var(--ocean) !important;
+        -webkit-text-fill-color: var(--ocean) !important;
+        border-radius: 3px 10px 3px 3px !important;
         font-family: 'DM Mono', monospace !important;
-        font-size: 0.7rem !important;
-        padding: 0.25rem 0.55rem !important;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
-        height: auto !important;
+        font-size: 0.68rem !important;
+        font-weight: 500 !important;
+        padding: 0.32rem 0.65rem !important;
+        box-shadow: none !important;
+        min-height: 2.1rem !important;
     }
-    div[data-testid="stPopover"] > button:hover {
-        background: var(--surface-hover) !important;
-        border-color: var(--border-focus) !important;
-        color: var(--text-strong) !important;
+    div[data-testid="stPopover"] button:hover,
+    div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"]:hover {
+        background: #E8E3D8 !important;
+        background-color: #E8E3D8 !important;
+        border-color: var(--ocean) !important;
+        color: var(--ocean) !important;
+        -webkit-text-fill-color: var(--ocean) !important;
+    }
+    div[data-testid="stPopover"] button svg {
+        color: var(--ocean) !important;
+        fill: var(--ocean) !important;
     }
 
     .stButton > button {
@@ -571,11 +561,11 @@ def main() -> None:
         desc = r.get("description")
 
         if status_val == "active":
-            status_html = '<span class="status-dot-pill status-active"><span class="dot-active"></span>Active</span>'
+            status_html = '<span class="status-label status-active">Active</span>'
         elif status_val == "rejected":
-            status_html = '<span class="status-dot-pill status-rejected"><span class="dot-rejected"></span>Rejected</span>'
+            status_html = '<span class="status-label status-rejected">Rejected</span>'
         else:
-            status_html = '<span class="status-dot-pill status-pending"><span class="dot-pending"></span>Pending</span>'
+            status_html = '<span class="status-label status-pending">Pending</span>'
 
         desc_html = f'<div class="file-desc-sub">{escape(desc)}</div>' if desc else '<div class="file-desc-sub" style="color: var(--text-subtle);">No field note</div>'
 
@@ -604,7 +594,7 @@ def main() -> None:
         with cols[5]:
             st.markdown(f"<div style='padding-top: 0.45rem;'>{status_html}</div>", unsafe_allow_html=True)
         with cols[6]:
-            action_popover = st.popover("Open", use_container_width=True)
+            action_popover = st.popover("Details", use_container_width=True)
             with action_popover:
                 st.markdown(f"**{escape(orig_name)}**")
                 try:
