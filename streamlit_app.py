@@ -365,16 +365,77 @@ st.markdown(
     }
 
     .empty-notice {
-        padding: 3.5rem 1.5rem;
+        padding: 2rem 1.5rem;
         text-align: center;
         color: var(--text-dim);
         font-size: 0.85rem;
     }
 
+    /* Single-viewport shell */
+    html,
+    body,
+    [data-testid="stAppViewContainer"],
+    .stApp,
+    .main {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+    }
+    [data-testid="stHeader"] {
+        height: 0 !important;
+        min-height: 0 !important;
+    }
+    .main .block-container {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        padding: 0.7rem 1.5rem 0.45rem !important;
+        overflow: hidden !important;
+    }
+    [data-testid="stVerticalBlock"] {
+        gap: 0.35rem !important;
+    }
+    .masthead {
+        padding: 0.85rem 0 0.7rem !important;
+        margin: 0 0 0.45rem !important;
+        gap: 1.5rem !important;
+    }
+    .masthead-kicker {
+        margin-bottom: 0.3rem !important;
+        font-size: 0.61rem !important;
+    }
+    .masthead-title {
+        font-size: clamp(2rem, 4.8vh, 3.25rem) !important;
+        line-height: 0.92 !important;
+    }
+    .masthead-note {
+        font-size: 0.78rem !important;
+        line-height: 1.35 !important;
+    }
+    [data-testid="stExpander"] summary {
+        min-height: 2.1rem !important;
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    .list-header {
+        padding-top: 0.52rem !important;
+        padding-bottom: 0.52rem !important;
+    }
+    .file-name-block {
+        min-height: 2.15rem;
+    }
+    .file-desc-sub {
+        margin-top: 0 !important;
+    }
+    div[data-testid="stTextInputRootElement"],
+    div[data-testid="stSelectbox"] > div > div {
+        min-height: 2.15rem !important;
+    }
+
     @media (max-width: 780px) {
-        .masthead { grid-template-columns: 1fr; gap: 1.25rem; padding-top: 2.5rem; }
-        .masthead-note { max-width: none; }
+        .masthead { grid-template-columns: 1fr; }
+        .masthead-note { display: none; }
         .brand-meta { display: none; }
+        .main .block-container { padding-left: 0.65rem !important; padding-right: 0.65rem !important; }
     }
     </style>
     """,
@@ -448,8 +509,8 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    # Ingest Accordion / Uploader
-    with st.expander("+ Add an object to the archive", expanded=False):
+    # Overlay uploader: opening it never increases the page height.
+    with st.popover("+ Add an object to the archive"):
         col_up1, col_up2 = st.columns([3, 2])
         with col_up1:
             uploaded_file = st.file_uploader(
@@ -509,17 +570,6 @@ def main() -> None:
     elif sort_order == "Name A-Z":
         filtered = sorted(filtered, key=lambda x: str(x.get("original_name") or "").lower())
 
-    st.markdown(
-        f"""
-        <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0 0.5rem 0.25rem;">
-            <div style="font-family: 'DM Mono', monospace; font-size: 0.66rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sea-glass);">
-                Objects in view / {len(filtered):02d}
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
     if not filtered:
         st.markdown(
             """
@@ -530,6 +580,38 @@ def main() -> None:
             unsafe_allow_html=True,
         )
         return
+
+    # Keep the shell within one viewport by paging instead of growing vertically.
+    page_size = 4
+    page_count = max(1, (len(filtered) + page_size - 1) // page_size)
+    filter_fingerprint = f"{search}|{filter_status}|{sort_order}"
+    if st.session_state.get("archive_filter") != filter_fingerprint:
+        st.session_state.archive_filter = filter_fingerprint
+        st.session_state.archive_page = 0
+
+    current_page = min(int(st.session_state.get("archive_page", 0)), page_count - 1)
+    page_start = current_page * page_size
+    page_records = filtered[page_start : page_start + page_size]
+    page_end = page_start + len(page_records)
+
+    index_col, previous_col, next_col = st.columns([8, 0.65, 0.65], vertical_alignment="center")
+    with index_col:
+        st.markdown(
+            f"""
+            <div style="font-family: 'DM Mono', monospace; font-size: 0.64rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-body);">
+                Objects {page_start + 1:02d}–{page_end:02d} / {len(filtered):02d}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with previous_col:
+        if st.button("←", key="archive_previous", disabled=current_page == 0, use_container_width=True):
+            st.session_state.archive_page = current_page - 1
+            st.rerun()
+    with next_col:
+        if st.button("→", key="archive_next", disabled=current_page >= page_count - 1, use_container_width=True):
+            st.session_state.archive_page = current_page + 1
+            st.rerun()
 
     # Table Header
     st.markdown(
@@ -550,7 +632,7 @@ def main() -> None:
     )
 
     # Table Rows
-    for r in filtered:
+    for r in page_records:
         rec_id = r["id"]
         orig_name = r.get("original_name") or "unnamed"
         ext = Path(orig_name).suffix.lstrip(".") or "txt"
