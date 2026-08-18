@@ -127,9 +127,9 @@ After `pip install -e .`, the equivalent command is `supabase-files`:
 supabase-files list
 ```
 
-## The Quiet Index frontend
+## Tideframe frontend
 
-The project also includes a minimal Streamlit interface called **The Quiet Index**. It is designed as a private field archive for researchers, archivists, and anyone collecting source material: calm paper tones, editorial record cards, context notes, validation status, and short-lived signed download links instead of a noisy admin grid.
+The project also includes a minimal Streamlit interface called **Tideframe**. Its visual language is inspired by a coastal field station: bone paper, ocean ink, sea-glass status colors, and a restrained signal-orange accent. It provides searchable source records, field notes, validation status, and short-lived signed download links without turning the archive into a noisy admin dashboard.
 
 Start it from the project folder:
 

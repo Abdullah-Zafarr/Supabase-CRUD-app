@@ -1,10 +1,12 @@
-"""The Quiet Index: a minimalist Streamlit front end for the CRUD service."""
+"""Tideframe: a quiet coastal-inspired Supabase object archive."""
 
 from __future__ import annotations
 
 import tempfile
+from datetime import datetime
 from html import escape
 from pathlib import Path
+from typing import Any
 
 import streamlit as st
 
@@ -14,65 +16,376 @@ from supabase_crud.service import FileService
 
 
 st.set_page_config(
-    page_title="The Quiet Index",
-    page_icon="⌁",
+    page_title="Tideframe Archive",
+    page_icon="◒",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
-
+# Custom design system: coastal field archive
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap');
 
     :root {
-        --ink: #242522;
-        --muted: #77766f;
-        --paper: #f4f1e9;
-        --card: #fbfaf6;
-        --line: #dad6cb;
-        --moss: #61715c;
-        --clay: #a85e46;
+        --canvas: #F2F0E8;
+        --surface: #FCFBF7;
+        --surface-hover: #E9F0EC;
+        --border: #CBD2CC;
+        --border-focus: #5B827C;
+        --text-strong: #15313A;
+        --text-body: #405B61;
+        --text-dim: #6F8180;
+        --text-subtle: #93A19E;
+        --ocean: #173F49;
+        --sea-glass: #2E746D;
+        --sea-glass-bg: #DCEAE4;
+        --signal: #E36A45;
+        --signal-bg: #FBE3D8;
+        --sand: #D9B977;
+        --sand-bg: #F4EACF;
     }
 
-    .stApp { background: var(--paper); color: var(--ink); }
-    [data-testid="stHeader"] { background: transparent; }
-    [data-testid="stSidebar"] { background: #ebe7dc; border-right: 1px solid var(--line); }
-    [data-testid="stSidebar"] > div:first-child { padding-top: 2rem; }
-    .block-container { max-width: 1180px; padding-top: 3rem; padding-bottom: 4rem; }
-    h1, h2, h3, p, label, button { font-family: 'Manrope', sans-serif; }
-    h1 { letter-spacing: -0.055em; font-size: clamp(2.6rem, 6vw, 5.5rem); line-height: .95; margin-bottom: .8rem; }
-    h2 { letter-spacing: -0.04em; font-size: 1.55rem; }
-    h3 { letter-spacing: -0.025em; }
-    .eyebrow, .mono, [data-testid="stMetricLabel"], [data-testid="stMetricValue"] {
+    /* Reset & Base */
+    .stApp {
+        background:
+            radial-gradient(circle at 88% 8%, rgba(46, 116, 109, 0.10), transparent 23rem),
+            linear-gradient(rgba(21, 49, 58, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(21, 49, 58, 0.025) 1px, transparent 1px),
+            var(--canvas) !important;
+        background-size: auto, 32px 32px, 32px 32px, auto !important;
+        color: var(--text-strong) !important;
+        font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
+
+    [data-testid="stHeader"] {
+        background: transparent !important;
+    }
+
+    .main .block-container {
+        max-width: 1120px !important;
+        padding: 2.25rem 1.5rem 6rem !important;
+    }
+
+    /* Top Bar */
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 1.75rem;
+    }
+    .brand-cluster {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .brand-mark {
+        width: 31px;
+        height: 31px;
+        background: var(--ocean);
+        color: #F8F5EB;
+        border-radius: 50% 50% 50% 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.72rem;
+        transform: rotate(-8deg);
+        box-shadow: 3px 3px 0 var(--sand);
+    }
+    .brand-title {
+        font-size: 1rem;
+        font-weight: 650;
+        color: var(--text-strong);
+        letter-spacing: -0.015em;
+    }
+    .brand-meta {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.63rem;
+        color: var(--text-dim);
+        padding-left: 0.8rem;
+        border-left: 1px solid var(--border-focus);
+    }
+
+    .masthead {
+        display: grid;
+        grid-template-columns: minmax(0, 2.2fr) minmax(220px, 1fr);
+        gap: 2rem;
+        align-items: end;
+        padding: 3.4rem 0 2.4rem;
+        border-bottom: 1px solid var(--border-focus);
+        margin-bottom: 1.35rem;
+    }
+    .masthead-kicker {
+        font-family: 'DM Mono', monospace;
+        color: var(--signal);
+        font-size: 0.68rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        margin-bottom: 0.8rem;
+    }
+    .masthead-title {
+        color: var(--ocean);
+        font-size: clamp(2.6rem, 6vw, 5.2rem);
+        line-height: 0.9;
+        letter-spacing: -0.065em;
+        font-weight: 580;
+        max-width: 720px;
+    }
+    .masthead-note {
+        font-size: 0.92rem;
+        line-height: 1.55;
+        color: var(--text-dim);
+        max-width: 300px;
+        padding-left: 1rem;
+        border-left: 2px solid var(--signal);
+    }
+
+    /* Upload Panel */
+    .upload-container {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .upload-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.85rem;
+    }
+    .upload-heading {
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-body);
+    }
+    .upload-constraints {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.68rem;
+        color: var(--text-dim);
+    }
+
+    /* List & Table Styling */
+    .list-wrapper {
+        background: var(--surface);
+        border: 1px solid var(--border-focus);
+        border-radius: 2px 14px 2px 2px;
+        overflow: hidden;
+        box-shadow: 5px 5px 0 rgba(23, 63, 73, 0.07);
+    }
+    .list-header {
+        display: grid;
+        grid-template-columns: 3.2fr 0.9fr 0.8fr 1.3fr 1.6fr 1fr 0.7fr;
+        padding: 0.75rem 1.25rem;
+        background: var(--ocean);
+        border-bottom: 1px solid var(--border);
+        font-family: 'DM Mono', monospace;
+        font-size: 0.61rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #DDE8E4;
+        align-items: center;
+    }
+    .file-row {
+        display: grid;
+        grid-template-columns: 3.2fr 0.9fr 0.8fr 1.3fr 1.6fr 1fr 0.7fr;
+        padding: 0.95rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        align-items: center;
+        background: var(--surface);
+        transition: background 0.15s ease;
+    }
+    .file-row:last-child {
+        border-bottom: none;
+    }
+    .file-row:hover {
+        background: var(--surface-hover);
+    }
+
+    /* File identity */
+    .file-name-block {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        overflow: hidden;
+    }
+    .file-ext-icon {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.62rem;
+        font-weight: 500;
+        width: 34px;
+        height: 28px;
+        border-radius: 50% 50% 50% 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-transform: uppercase;
+        flex-shrink: 0;
+        border: 1px solid var(--border);
+        background: var(--sea-glass-bg);
+        color: var(--sea-glass);
+    }
+    .file-name-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-strong);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .file-desc-sub {
+        font-size: 0.73rem;
+        color: var(--text-dim);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 0.1rem;
+    }
+
+    .cell-data {
+        font-size: 0.8rem;
+        color: var(--text-body);
+    }
+    .cell-mono {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.71rem;
+        color: var(--text-dim);
+    }
+
+    /* Status Pill */
+    .status-dot-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+        font-weight: 500;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+    }
+    .dot-active {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--sea-glass);
+    }
+    .status-active {
+        background: var(--sea-glass-bg);
+        color: #1E5C56;
+    }
+    .dot-pending {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--sand);
+    }
+    .status-pending {
+        background: var(--sand-bg);
+        color: #72591F;
+    }
+    .dot-rejected {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--signal);
+    }
+    .status-rejected {
+        background: var(--signal-bg);
+        color: #A33D23;
+    }
+
+    /* Clean Streamlit Overrides */
+    div[data-testid="stPopover"] > button {
+        background: var(--surface) !important;
+        border: 1px solid var(--border-focus) !important;
+        color: var(--text-body) !important;
+        border-radius: 999px !important;
         font-family: 'DM Mono', monospace !important;
+        font-size: 0.7rem !important;
+        padding: 0.25rem 0.55rem !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+        height: auto !important;
     }
-    .eyebrow { color: var(--clay); font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; }
-    .lede { color: var(--muted); font-size: 1.06rem; max-width: 620px; line-height: 1.6; }
-    .rule { height: 1px; background: var(--line); margin: 2.2rem 0 1.4rem; }
-    .record-card {
-        background: var(--card); border: 1px solid var(--line); border-radius: 3px;
-        padding: 1.1rem 1.25rem .6rem; margin: .65rem 0 1rem;
-        box-shadow: 0 5px 20px rgba(47, 44, 34, .035);
+    div[data-testid="stPopover"] > button:hover {
+        background: var(--surface-hover) !important;
+        border-color: var(--border-focus) !important;
+        color: var(--text-strong) !important;
     }
-    .record-name { font-size: 1.1rem; font-weight: 700; letter-spacing: -.02em; overflow-wrap: anywhere; }
-    .record-description { color: var(--muted); font-size: .88rem; margin-top: .35rem; min-height: 1.25rem; }
-    .record-meta { color: var(--muted); font-family: 'DM Mono', monospace; font-size: .7rem; line-height: 1.7; }
-    .status {
-        border-radius: 99px; display: inline-block; font-family: 'DM Mono', monospace;
-        font-size: .64rem; letter-spacing: .08em; padding: .32rem .55rem; text-transform: uppercase;
+
+    .stButton > button {
+        border-radius: 999px !important;
+        font-weight: 500 !important;
+        font-size: 0.8rem !important;
+        border-color: var(--border-focus) !important;
+        color: var(--ocean) !important;
+        background: var(--surface) !important;
     }
-    .status-active { background: #e2eadc; color: #4c6349; }
-    .status-pending { background: #f4ead0; color: #8b6a2e; }
-    .status-rejected { background: #f0ddd7; color: #914e3c; }
-    .empty {
-        border: 1px dashed #c5c0b4; color: var(--muted); padding: 3.5rem 2rem;
-        text-align: center; margin-top: 1rem;
+    .stButton > button[kind="primary"] {
+        background: var(--signal) !important;
+        border-color: var(--signal) !important;
+        color: white !important;
     }
-    div[data-testid="stMetric"] { background: transparent; border-left: 1px solid var(--line); padding-left: 1rem; }
-    div[data-testid="stMetricValue"] { font-size: 1.35rem; }
-    .stButton button, .stDownloadButton button { border-radius: 2px; }
+    .stButton > button:hover {
+        border-color: var(--signal) !important;
+        color: var(--signal) !important;
+    }
+    .stButton > button[kind="primary"]:hover {
+        background: #C95132 !important;
+        border-color: #C95132 !important;
+        color: white !important;
+    }
+
+    .stTextInput input, .stTextArea textarea, .stSelectbox select {
+        border-radius: 3px 12px 3px 3px !important;
+        border: 1px solid var(--border-focus) !important;
+        background: var(--surface) !important;
+        font-size: 0.82rem !important;
+        color: var(--text-strong) !important;
+    }
+
+    [data-testid="stFileUploader"] {
+        padding: 0 !important;
+    }
+    [data-testid="stFileUploader"] section {
+        border: 1px dashed var(--border-focus) !important;
+        border-radius: 3px 18px 3px 3px !important;
+        background: #F7F5ED !important;
+        padding: 1.25rem 1rem !important;
+    }
+    [data-testid="stFileUploader"] section:hover {
+        border-color: var(--signal) !important;
+    }
+
+    [data-testid="stExpander"] {
+        border: 1px solid var(--border-focus) !important;
+        border-radius: 2px 14px 2px 2px !important;
+        background: rgba(252, 251, 247, 0.78) !important;
+    }
+    [data-testid="stExpander"] summary {
+        font-family: 'DM Mono', monospace !important;
+        font-size: 0.72rem !important;
+        color: var(--ocean) !important;
+    }
+
+    .empty-notice {
+        padding: 3.5rem 1.5rem;
+        text-align: center;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+    }
+
+    @media (max-width: 780px) {
+        .masthead { grid-template-columns: 1fr; gap: 1.25rem; padding-top: 2.5rem; }
+        .masthead-note { max-width: none; }
+        .brand-meta { display: none; }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -84,9 +397,14 @@ def get_service() -> FileService:
     return FileService(Settings.from_env())
 
 
-def format_date(value: object) -> str:
-    text = str(value or "")
-    return text.replace("T", " ").replace("+00:00", " UTC")[:19]
+def format_iso(iso_str: object) -> str:
+    if not iso_str:
+        return "—"
+    try:
+        dt = datetime.fromisoformat(str(iso_str).replace("Z", "+00:00"))
+        return dt.strftime("%b %d, %Y · %H:%M")
+    except Exception:
+        return str(iso_str)[:16]
 
 
 def upload_to_temp(uploaded_file) -> Path:
@@ -99,219 +417,243 @@ def upload_to_temp(uploaded_file) -> Path:
         handle.close()
 
 
-def render_sidebar(service: FileService) -> None:
-    with st.sidebar:
-        st.markdown('<div class="eyebrow">New specimen</div>', unsafe_allow_html=True)
-        st.markdown("### Add to the index")
-        st.caption("A document enters the archive only after the server-side validator signs off.")
-        with st.form("new_upload", clear_on_submit=True):
-            uploaded = st.file_uploader(
-                "Choose a source file",
-                type=["pdf", "jpg", "jpeg", "png", "gif", "webp", "txt", "csv", "json"],
-                label_visibility="collapsed",
-            )
-            description = st.text_area(
-                "Context note",
-                placeholder="Why does this belong in the archive?",
-                height=90,
-            )
-            submitted = st.form_submit_button("Archive file", use_container_width=True)
-        if submitted:
-            if uploaded is None:
-                st.warning("Choose a file first.")
-                return
-            if uploaded.size > service.settings.max_file_size_bytes:
-                st.error(
-                    f"That file is {human_size(uploaded.size)}; limit is "
-                    f"{human_size(service.settings.max_file_size_bytes)}."
-                )
-                return
-            temp_path = upload_to_temp(uploaded)
-            try:
-                with st.spinner("Indexing and validating…"):
-                    service.create_file(str(temp_path), description.strip() or None)
-                st.success("Archived and validated.")
-                st.rerun()
-            except Exception as exc:
-                st.error(str(exc))
-            finally:
-                temp_path.unlink(missing_ok=True)
-
-        st.markdown('<div class="rule"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="eyebrow">Collection note</div>', unsafe_allow_html=True)
-        st.caption(
-            "The Quiet Index is intentionally private. Files stay in Supabase Storage; "
-            "this local interface requests bytes only when you download them."
-        )
-
-
-def render_record(service: FileService, record: dict) -> None:
-    record_id = record["id"]
-    status = record.get("status", "pending")
-    status_class = status if status in {"active", "pending", "rejected"} else "pending"
-    description = escape(str(record.get("description") or "No context note yet."))
-    original_name = escape(str(record["original_name"]))
-    size = human_size(record.get("size_bytes"))
-    content_type = record.get("content_type") or "unknown type"
-    checksum = (record.get("checksum_sha256") or "not generated")[:16]
-
-    st.markdown('<div class="record-card">', unsafe_allow_html=True)
-    top_left, top_right = st.columns([5, 1])
-    with top_left:
-        st.markdown(f'<div class="record-name">{original_name}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="record-description">{description}</div>', unsafe_allow_html=True)
-    with top_right:
+def main() -> None:
+    # Top Bar
+    top_c1, top_c2 = st.columns([5, 1.2])
+    with top_c1:
         st.markdown(
-            f'<span class="status status-{status_class}">{status}</span>',
+            """
+            <div class="brand-cluster">
+                <div class="brand-mark">TF</div>
+                <span class="brand-title">Tideframe</span>
+                <span class="brand-meta">private object archive · documents</span>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-    st.markdown(
-        f'<div class="record-meta">{content_type} &nbsp;·&nbsp; {size} &nbsp;·&nbsp; '
-        f'added {format_date(record.get("created_at"))} &nbsp;·&nbsp; sha {checksum}</div>',
-        unsafe_allow_html=True,
-    )
-
-    actions = st.columns([1.1, 1.1, 1.1, 1.1, 3.6])
-    with actions[0]:
-        try:
-            signed_url = service.create_signed_url(record_id)
-            st.link_button(
-                "Download",
-                signed_url,
-                use_container_width=True,
-            )
-        except Exception:
-            st.caption("File unavailable")
-    with actions[1]:
-        edit_open = st.popover("Edit note", use_container_width=True)
-        with edit_open:
-            with st.form(f"edit-{record_id}"):
-                new_description = st.text_area(
-                    "Context note",
-                    value=record.get("description") or "",
-                    key=f"description-{record_id}",
-                )
-                save_edit = st.form_submit_button("Save", use_container_width=True)
-            if save_edit:
-                try:
-                    service.update_metadata(record_id, description=new_description.strip())
-                    st.success("Saved")
-                    st.rerun()
-                except Exception as exc:
-                    st.error(str(exc))
-    with actions[2]:
-        replace_open = st.popover("Replace", use_container_width=True)
-        with replace_open:
-            replacement = st.file_uploader(
-                "New version",
-                type=["pdf", "jpg", "jpeg", "png", "gif", "webp", "txt", "csv", "json"],
-                key=f"replace-file-{record_id}",
-            )
-            replace_description = st.text_input(
-                "Context note",
-                value=record.get("description") or "",
-                key=f"replace-description-{record_id}",
-            )
-            replace_submit = st.button("Validate replacement", key=f"replace-submit-{record_id}")
-            if replace_submit:
-                if replacement is None:
-                    st.warning("Choose a replacement file first.")
-                elif replacement.size > service.settings.max_file_size_bytes:
-                    st.error("Replacement exceeds the configured size limit.")
-                else:
-                    temp_path = upload_to_temp(replacement)
-                    try:
-                        with st.spinner("Validating replacement…"):
-                            service.replace_file(
-                                record_id,
-                                str(temp_path),
-                                description=replace_description.strip() or None,
-                            )
-                        st.success("Version replaced.")
-                        st.rerun()
-                    except Exception as exc:
-                        st.error(str(exc))
-                    finally:
-                        temp_path.unlink(missing_ok=True)
-    with actions[3]:
-        if st.button("Remove", key=f"delete-{record_id}", use_container_width=True):
-            try:
-                service.delete_file(record_id)
-                st.toast("Removed from the index.")
-                st.rerun()
-            except Exception as exc:
-                st.error(str(exc))
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-def main() -> None:
-    st.markdown('<div class="eyebrow">Private field archive · v1</div>', unsafe_allow_html=True)
-    st.title("The Quiet Index")
-    st.markdown(
-        '<p class="lede">A calm, searchable shelf for the source material behind your thinking. '
-        "Upload a document, leave a trace of context, and let Supabase verify the object before it settles in.</p>",
-        unsafe_allow_html=True,
-    )
+    with top_c2:
+        if st.button("Refresh index", use_container_width=True):
+            st.rerun()
 
     try:
         service = get_service()
     except ConfigurationError as exc:
         st.error(str(exc))
-        st.info("Copy .env.example to .env, add your Supabase URL, server-side key, and Edge Function secret, then reload.")
+        st.info("Check .env credentials.")
         st.stop()
 
-    render_sidebar(service)
+    st.markdown(
+        """
+        <section class="masthead">
+            <div>
+                <div class="masthead-kicker">Supabase · field storage</div>
+                <div class="masthead-title">Keep every signal.</div>
+            </div>
+            <div class="masthead-note">
+                A small, private registry for source files, evidence, and the notes
+                that make them useful later.
+            </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Ingest Accordion / Uploader
+    with st.expander("+ Add an object to the archive", expanded=False):
+        col_up1, col_up2 = st.columns([3, 2])
+        with col_up1:
+            uploaded_file = st.file_uploader(
+                "Upload file",
+                type=["pdf", "png", "jpg", "jpeg", "webp", "gif", "txt", "csv", "json", "docx"],
+                help="Allowed: PDF, Images, Plaintext, CSV, JSON (up to 10 MB)",
+            )
+        with col_up2:
+            uploader_name = st.text_input("Uploader tag", value=service.settings.app_user)
+            file_note = st.text_area("Context note (optional)", placeholder="Add context or notes...", height=72)
+
+        if uploaded_file is not None:
+            if st.button("Validate & archive", type="primary"):
+                if uploaded_file.size > service.settings.max_file_size_bytes:
+                    st.error(f"File exceeds {human_size(service.settings.max_file_size_bytes)}.")
+                else:
+                    t_path = upload_to_temp(uploaded_file)
+                    try:
+                        with st.spinner("Uploading and validating with Edge Function..."):
+                            service.create_file(str(t_path), description=file_note.strip() or None)
+                        st.toast("File validated and archived.", icon="✓")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Upload rejected: {e}")
+                    finally:
+                        t_path.unlink(missing_ok=True)
+
+    st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+
+    # Data & Filters
     records = service.list_files()
-    active = [row for row in records if row.get("status") == "active"]
-    total_bytes = sum(row.get("size_bytes") or 0 for row in records)
 
-    metric_cols = st.columns(4)
-    metric_cols[0].metric("Indexed", len(records))
-    metric_cols[1].metric("Validated", len(active))
-    metric_cols[2].metric("Pending", len(records) - len(active))
-    metric_cols[3].metric("Footprint", human_size(total_bytes))
-
-    st.markdown('<div class="rule"></div>', unsafe_allow_html=True)
-    controls = st.columns([3.5, 1.3])
-    with controls[0]:
-        search = st.text_input(
-            "Search the index",
-            placeholder="filename, context, or MIME type",
-            label_visibility="collapsed",
-        ).strip().lower()
-    with controls[1]:
-        filter_status = st.selectbox(
-            "Status",
-            ["All statuses", "active", "pending", "rejected"],
-            label_visibility="collapsed",
-        )
+    # Search & Filter bar
+    f1, f2, f3 = st.columns([4, 1.8, 1.8])
+    with f1:
+        search = st.text_input("Search", placeholder="Search filename, note, type...", label_visibility="collapsed").strip().lower()
+    with f2:
+        filter_status = st.selectbox("Status", ["All statuses", "active", "pending", "rejected"], label_visibility="collapsed")
+    with f3:
+        sort_order = st.selectbox("Sort", ["Newest first", "Oldest first", "Largest size", "Name A-Z"], label_visibility="collapsed")
 
     filtered = records
     if search:
         filtered = [
-            row
-            for row in filtered
-            if search in " ".join(
-                str(row.get(field) or "")
-                for field in ("original_name", "description", "content_type")
-            ).lower()
+            r for r in filtered
+            if search in f"{r.get('original_name', '')} {r.get('description', '')} {r.get('content_type', '')}".lower()
         ]
     if filter_status != "All statuses":
-        filtered = [row for row in filtered if row.get("status") == filter_status]
+        filtered = [r for r in filtered if (r.get("status") or "").lower() == filter_status]
+
+    if sort_order == "Newest first":
+        filtered = sorted(filtered, key=lambda x: str(x.get("created_at") or ""), reverse=True)
+    elif sort_order == "Oldest first":
+        filtered = sorted(filtered, key=lambda x: str(x.get("created_at") or ""))
+    elif sort_order == "Largest size":
+        filtered = sorted(filtered, key=lambda x: int(x.get("size_bytes") or 0), reverse=True)
+    elif sort_order == "Name A-Z":
+        filtered = sorted(filtered, key=lambda x: str(x.get("original_name") or "").lower())
 
     st.markdown(
-        f'<div class="eyebrow">{len(filtered):02d} records on shelf</div>',
+        f"""
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0 0.5rem 0.25rem;">
+            <div style="font-family: 'DM Mono', monospace; font-size: 0.66rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sea-glass);">
+                Objects in view / {len(filtered):02d}
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
+
     if not filtered:
         st.markdown(
-            '<div class="empty"><strong>The shelf is quiet.</strong><br>'
-            'Upload a source from the sidebar to begin a new trail.</div>',
+            """
+            <div class="list-wrapper">
+                <div class="empty-notice">No records match the current filter.</div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-    else:
-        for record in filtered:
-            render_record(service, record)
+        return
+
+    # Table Header
+    st.markdown(
+        """
+        <div class="list-wrapper">
+            <div class="list-header">
+                <div>Document</div>
+                <div>Size</div>
+                <div>Format</div>
+                <div>Uploader</div>
+                <div>Timestamp</div>
+                <div>Status</div>
+                <div style="text-align: right;">Action</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Table Rows
+    for r in filtered:
+        rec_id = r["id"]
+        orig_name = r.get("original_name") or "unnamed"
+        ext = Path(orig_name).suffix.lstrip(".") or "txt"
+        size_str = human_size(r.get("size_bytes"))
+        uploader_str = r.get("uploaded_by") or "service-app"
+        date_str = format_iso(r.get("created_at"))
+        status_val = (r.get("status") or "pending").lower()
+        desc = r.get("description")
+
+        if status_val == "active":
+            status_html = '<span class="status-dot-pill status-active"><span class="dot-active"></span>Active</span>'
+        elif status_val == "rejected":
+            status_html = '<span class="status-dot-pill status-rejected"><span class="dot-rejected"></span>Rejected</span>'
+        else:
+            status_html = '<span class="status-dot-pill status-pending"><span class="dot-pending"></span>Pending</span>'
+
+        desc_html = f'<div class="file-desc-sub">{escape(desc)}</div>' if desc else '<div class="file-desc-sub" style="color: var(--text-subtle);">No field note</div>'
+
+        cols = st.columns([3.2, 0.9, 0.8, 1.3, 1.6, 1.0, 0.7])
+        with cols[0]:
+            st.markdown(
+                f"""
+                <div class="file-name-block">
+                    <div class="file-ext-icon">{ext[:4]}</div>
+                    <div style="overflow: hidden;">
+                        <div class="file-name-text">{escape(orig_name)}</div>
+                        {desc_html}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with cols[1]:
+            st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-mono'>{size_str}</div>", unsafe_allow_html=True)
+        with cols[2]:
+            st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-mono'>.{ext.lower()}</div>", unsafe_allow_html=True)
+        with cols[3]:
+            st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-data'>{escape(uploader_str)}</div>", unsafe_allow_html=True)
+        with cols[4]:
+            st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-mono'>{date_str}</div>", unsafe_allow_html=True)
+        with cols[5]:
+            st.markdown(f"<div style='padding-top: 0.45rem;'>{status_html}</div>", unsafe_allow_html=True)
+        with cols[6]:
+            action_popover = st.popover("Open", use_container_width=True)
+            with action_popover:
+                st.markdown(f"**{escape(orig_name)}**")
+                try:
+                    signed_url = service.create_signed_url(rec_id)
+                    st.link_button("Download object", signed_url, use_container_width=True)
+                except Exception:
+                    st.caption("Download link unavailable")
+
+                st.divider()
+
+                with st.form(f"note_form_{rec_id}"):
+                    st.caption("Edit label and field note")
+                    new_n = st.text_input("Name", value=orig_name, key=f"nm_{rec_id}")
+                    new_d = st.text_area("Note", value=desc or "", height=60, key=f"nt_{rec_id}")
+                    if st.form_submit_button("Save Updates", use_container_width=True):
+                        try:
+                            service.update_metadata(rec_id, description=new_d.strip() or None, original_name=new_n.strip() or None)
+                            st.toast("Record updated.", icon="✓")
+                            st.rerun()
+                        except Exception as err:
+                            st.error(str(err))
+
+                st.divider()
+
+                with st.expander("Replace payload"):
+                    rf = st.file_uploader("Candidate file", type=["pdf", "png", "jpg", "jpeg", "webp", "gif", "txt", "csv", "json", "docx"], key=f"rf_{rec_id}")
+                    if st.button("Swap & Revalidate", key=f"rbtn_{rec_id}", use_container_width=True):
+                        if rf:
+                            tp = upload_to_temp(rf)
+                            try:
+                                service.replace_file(rec_id, str(tp))
+                                st.toast("Replacement validated.", icon="✓")
+                                st.rerun()
+                            except Exception as err:
+                                st.error(str(err))
+                            finally:
+                                tp.unlink(missing_ok=True)
+
+                st.divider()
+
+                if st.button("Delete Permanently", key=f"del_{rec_id}", type="primary", use_container_width=True):
+                    try:
+                        service.delete_file(rec_id)
+                        st.toast("Object removed.")
+                        st.rerun()
+                    except Exception as err:
+                        st.error(str(err))
+
+        st.markdown("<div style='height: 1px; background: var(--border); margin: 0.15rem 0;'></div>", unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
