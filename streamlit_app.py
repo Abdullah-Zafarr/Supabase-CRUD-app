@@ -1,4 +1,4 @@
-"""Tideframe: a quiet coastal-inspired Supabase object archive."""
+"""StorageDocker: high-performance Supabase object storage."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ import tempfile
 from datetime import datetime
 from html import escape
 from pathlib import Path
-from typing import Any
 
 import streamlit as st
 
@@ -16,752 +15,548 @@ from supabase_crud.service import FileService
 
 
 st.set_page_config(
-    page_title="Tideframe Archive",
-    page_icon="◒",
+    page_title="StorageDocker",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# Custom design system: coastal field archive
+# Custom Design: StorageDocker Dark Minimalist Theme
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
     :root {
-        --canvas: #F2F0E8;
-        --surface: #FCFBF7;
-        --surface-hover: #E9F0EC;
-        --border: #CBD2CC;
-        --border-focus: #5B827C;
-        --text-strong: #15313A;
-        --text-body: #405B61;
-        --text-dim: #6F8180;
-        --text-subtle: #93A19E;
-        --ocean: #173F49;
-        --sea-glass: #2E746D;
-        --sea-glass-bg: #DCEAE4;
-        --signal: #E36A45;
-        --signal-bg: #FBE3D8;
-        --sand: #D9B977;
-        --sand-bg: #F4EACF;
+        --canvas: #0B0C0E;
+        --surface: #131418;
+        --surface-soft: #181A20;
+        --surface-hover: #1E2028;
+        --border: #232630;
+        --border-focus: #EF4444;
+        --text-strong: #FFFFFF;
+        --text-body: #B0B7C6;
+        --text-dim: #717888;
+        --text-subtle: #4B5262;
+        --red: #E53E3E;
+        --red-hover: #F56565;
+        --red-subtle: rgba(229, 62, 62, 0.12);
+        --red-border: rgba(229, 62, 62, 0.28);
+        --supabase-green: #3ECF8E;
     }
 
     /* Reset & Base */
-    .stApp {
-        background: var(--canvas) !important;
+    html, body, .stApp {
+        background-color: var(--canvas) !important;
         color: var(--text-strong) !important;
-        font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        margin: 0;
+        padding: 0;
     }
 
     [data-testid="stHeader"] {
         background: transparent !important;
+        height: 0 !important;
+        min-height: 0 !important;
     }
 
+    [data-testid="stMainBlockContainer"],
     .main .block-container {
-        max-width: 1120px !important;
-        padding: 2.25rem 1.5rem 6rem !important;
+        max-width: 1340px !important;
+        width: 95% !important;
+        margin: 0 auto !important;
+        padding: 2.2rem 2rem 5rem !important;
     }
 
-    /* Top Bar */
-    .top-bar {
+    [data-testid="stVerticalBlock"] {
+        gap: 1.15rem !important;
+    }
+
+    /* Header Masthead */
+    .brand-masthead {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-bottom: 1.5rem;
+        padding-bottom: 1.4rem;
         border-bottom: 1px solid var(--border);
-        margin-bottom: 1.75rem;
+        margin-bottom: 0.25rem;
     }
     .brand-cluster {
         display: flex;
         align-items: center;
-        gap: 0.8rem;
+        gap: 1.1rem;
     }
-    .brand-mark {
-        width: 24px;
-        height: 24px;
-        background: var(--ocean);
-        color: #F8F5EB;
-        border-radius: 50%;
+    .supabase-logo-mark {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: 'DM Mono', monospace;
-        font-size: 0.58rem;
-    }
-    .brand-title {
-        font-size: 1rem;
-        font-weight: 650;
-        color: var(--text-strong);
-        letter-spacing: -0.015em;
-    }
-    .brand-meta {
-        font-family: 'DM Mono', monospace;
-        font-size: 0.63rem;
-        color: var(--text-dim);
-        padding-left: 0.8rem;
-        border-left: 1px solid var(--border-focus);
-    }
-
-    .masthead {
-        padding: 0.65rem 0 0.45rem;
-        border-bottom: 0;
-        margin-bottom: 0.2rem;
-    }
-    .masthead-kicker {
-        font-family: 'DM Mono', monospace;
-        color: var(--signal);
-        font-size: 0.68rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        margin-bottom: 0.8rem;
-    }
-    .masthead-title {
-        color: var(--ocean);
-        font-size: clamp(2rem, 4vw, 3rem);
-        line-height: 0.9;
-        letter-spacing: -0.065em;
-        font-weight: 580;
-        max-width: 720px;
-    }
-    .masthead-note {
-        font-size: 0.92rem;
-        line-height: 1.55;
-        color: var(--text-dim);
-        max-width: 300px;
-        padding-left: 1rem;
-        border-left: 2px solid var(--signal);
-    }
-
-    /* Upload Panel */
-    .upload-container {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 2rem;
-    }
-    .upload-title-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.85rem;
-    }
-    .upload-heading {
-        font-size: 0.82rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--text-body);
-    }
-    .upload-constraints {
-        font-family: 'DM Mono', monospace;
-        font-size: 0.68rem;
-        color: var(--text-dim);
-    }
-
-    /* List & Table Styling */
-    .list-wrapper {
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        overflow: hidden;
-        box-shadow: none;
-    }
-    .list-header {
-        display: grid;
-        grid-template-columns: 5.2fr 0.8fr 1.8fr 0.8fr 0.35fr;
-        padding: 0.55rem 0.4rem;
-        background: transparent;
-        border-top: 1px solid var(--border);
-        border-bottom: 1px solid var(--border);
-        font-family: 'DM Mono', monospace;
-        font-size: 0.61rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--text-dim);
-        align-items: center;
-    }
-    .file-row {
-        display: grid;
-        grid-template-columns: 5.2fr 0.8fr 1.8fr 0.8fr 0.35fr;
-        padding: 0.95rem 1.25rem;
-        border-bottom: 1px solid var(--border);
-        align-items: center;
-        background: var(--surface);
-        transition: background 0.15s ease;
-    }
-    .file-row:last-child {
-        border-bottom: none;
-    }
-    .file-row:hover {
-        background: var(--surface-hover);
-    }
-
-    /* File identity */
-    .file-name-block {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        overflow: hidden;
-    }
-    .file-ext-icon {
-        font-family: 'DM Mono', monospace;
-        font-size: 0.62rem;
-        font-weight: 500;
-        width: 34px;
-        height: auto;
-        border-radius: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-transform: uppercase;
-        flex-shrink: 0;
-        border: 0;
-        background: transparent;
-        color: var(--text-dim);
-    }
-    .file-name-text {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--text-strong);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .file-desc-sub {
-        font-size: 0.73rem;
-        color: var(--text-dim);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin-top: 0.1rem;
-    }
-
-    .cell-data {
-        font-size: 0.8rem;
-        color: var(--text-body);
-    }
-    .cell-mono {
-        font-family: 'DM Mono', monospace;
-        font-size: 0.71rem;
-        color: var(--text-dim);
-    }
-
-    /* Restrained text-only status treatment */
-    .status-label {
-        display: inline-block;
-        font-family: 'DM Mono', monospace;
-        font-size: 0.66rem;
-        font-weight: 500;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
-    .status-active {
-        color: var(--text-body);
-    }
-    .status-pending {
-        color: #80662D;
-    }
-    .status-rejected {
-        color: #A33D23;
-    }
-
-    /* Clean Streamlit Overrides */
-    div[data-testid="stPopover"] button,
-    div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"] {
-        background: transparent !important;
-        background-color: transparent !important;
-        background-image: none !important;
-        border: 0 !important;
-        color: var(--ocean) !important;
-        -webkit-text-fill-color: var(--ocean) !important;
-        border-radius: 3px !important;
-        font-family: 'DM Mono', monospace !important;
-        font-size: 0.68rem !important;
-        font-weight: 500 !important;
-        padding: 0.22rem 0.35rem !important;
-        box-shadow: none !important;
-        min-height: 1.9rem !important;
-    }
-    div[data-testid="stPopover"] button:hover,
-    div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"]:hover {
-        background: rgba(21, 49, 58, 0.06) !important;
-        background-color: rgba(21, 49, 58, 0.06) !important;
-        border-color: transparent !important;
-        color: var(--ocean) !important;
-        -webkit-text-fill-color: var(--ocean) !important;
-    }
-    div[data-testid="stPopover"] button svg {
-        color: var(--ocean) !important;
-        fill: var(--ocean) !important;
-    }
-
-    .stButton > button {
-        border-radius: 999px !important;
-        font-weight: 500 !important;
-        font-size: 0.8rem !important;
-        border-color: var(--border-focus) !important;
-        color: var(--ocean) !important;
-        background: var(--surface) !important;
-    }
-    .stButton > button[kind="primary"] {
-        background: var(--signal) !important;
-        border-color: var(--signal) !important;
-        color: white !important;
-    }
-    .stButton > button:hover {
-        border-color: var(--signal) !important;
-        color: var(--signal) !important;
-    }
-    .stButton > button[kind="primary"]:hover {
-        background: #C95132 !important;
-        border-color: #C95132 !important;
-        color: white !important;
-    }
-
-    .stTextInput input, .stTextArea textarea, .stSelectbox select {
-        border-radius: 3px 12px 3px 3px !important;
-        border: 1px solid var(--border-focus) !important;
-        background: var(--surface) !important;
-        font-size: 0.82rem !important;
-        color: var(--text-strong) !important;
-    }
-
-    [data-testid="stFileUploader"] {
-        padding: 0 !important;
-    }
-    [data-testid="stFileUploader"] section {
-        border: 1px dashed var(--border-focus) !important;
-        border-radius: 3px 18px 3px 3px !important;
-        background: #F7F5ED !important;
-        padding: 1.25rem 1rem !important;
-    }
-    [data-testid="stFileUploader"] section:hover {
-        border-color: var(--signal) !important;
-    }
-
-    [data-testid="stExpander"] {
-        border: 1px solid var(--border-focus) !important;
-        border-radius: 2px 14px 2px 2px !important;
-        background: rgba(252, 251, 247, 0.78) !important;
-    }
-    [data-testid="stExpander"] summary {
-        font-family: 'DM Mono', monospace !important;
-        font-size: 0.72rem !important;
-        color: var(--ocean) !important;
-    }
-
-    .empty-notice {
-        padding: 2rem 1.5rem;
-        text-align: center;
-        color: var(--text-dim);
-        font-size: 0.85rem;
-    }
-
-    .index-count {
-        font-family: 'DM Mono', monospace;
-        font-size: 0.61rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--text-dim);
-        padding: 0.15rem 0 0.1rem;
-    }
-
-    /* Single-viewport shell */
-    html,
-    body,
-    [data-testid="stAppViewContainer"],
-    .stApp,
-    .main {
-        height: 100vh !important;
-        max-height: 100vh !important;
-        overflow: hidden !important;
-    }
-    [data-testid="stHeader"] {
-        height: 0 !important;
-        min-height: 0 !important;
-    }
-    .main .block-container {
-        height: 100vh !important;
-        max-height: 100vh !important;
-        padding: 0.7rem 1.5rem 0.45rem !important;
-        overflow: hidden !important;
-    }
-    [data-testid="stVerticalBlock"] {
-        gap: 0.35rem !important;
-    }
-    .masthead {
-        padding: 0.45rem 0 0.25rem !important;
-        margin: 0 !important;
-    }
-    .masthead-title {
-        font-size: clamp(1.8rem, 4vh, 2.6rem) !important;
-        line-height: 1 !important;
-    }
-    [data-testid="stExpander"] summary {
-        min-height: 2.1rem !important;
-        padding-top: 0.25rem !important;
-        padding-bottom: 0.25rem !important;
-    }
-    .list-header {
-        padding-top: 0.52rem !important;
-        padding-bottom: 0.52rem !important;
-    }
-    .file-name-block {
-        min-height: 2.15rem;
-    }
-    .file-desc-sub {
-        margin-top: 0 !important;
-    }
-    div[data-testid="stTextInputRootElement"],
-    div[data-testid="stSelectbox"] > div > div {
-        min-height: 2.15rem !important;
-    }
-
-    @media (max-width: 780px) {
-        .masthead { grid-template-columns: 1fr; }
-        .masthead-note { display: none; }
-        .brand-meta { display: none; }
-        .main .block-container { padding-left: 0.65rem !important; padding-right: 0.65rem !important; }
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-# Archival ledger treatment: inspired by clarity, not by the reference's visual system.
-st.markdown(
-    """
-    <style>
-    :root {
-        --canvas: #F3F0E8;
-        --surface: #FFFEFA;
-        --surface-soft: #ECE7DD;
-        --border: #D8D1C3;
-        --text-strong: #252C2D;
-        --text-body: #536164;
-        --text-dim: #7B8787;
-        --ocean: #263F43;
-        --signal: #B95E3E;
-    }
-
-    .stApp { background: var(--canvas) !important; }
-
-    [data-testid="stMainBlockContainer"],
-    .main .block-container {
-        max-width: 1220px !important;
-        padding-top: 1.45rem !important;
-    }
-
-    .brand-cluster { gap: 0.7rem !important; }
-    .brand-mark {
-        width: 31px !important;
-        height: 31px !important;
-        border-radius: 8px 8px 8px 2px !important;
-        background: var(--signal) !important;
-        font-size: 0.62rem !important;
-        box-shadow: 3px 3px 0 #D9C6B4;
+        width: 44px;
+        height: 44px;
+        background: #14171F;
+        border: 1px solid #282D3D;
+        border-radius: 10px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
     }
     .brand-copy {
         display: flex;
         flex-direction: column;
-        line-height: 1.05;
     }
     .brand-title {
-        font-size: 1rem !important;
-        color: var(--text-strong) !important;
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: var(--text-strong);
+        letter-spacing: -0.03em;
+        line-height: 1.15;
     }
-    .brand-subtitle {
-        margin-top: 0.25rem;
-        font-family: 'DM Mono', monospace;
-        font-size: 0.58rem;
+    .brand-title span {
+        color: var(--red);
+    }
+    .brand-tagline {
+        font-size: 0.82rem;
+        font-weight: 600;
         color: var(--text-dim);
-        letter-spacing: 0.04em;
+        margin-top: 0.15rem;
     }
 
-    .st-key-ingest_panel {
-        margin-top: 0.85rem;
-        padding: 0.72rem 0.85rem 0.78rem;
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    .stat-card {
         background: var(--surface);
         border: 1px solid var(--border);
-        border-top: 3px solid var(--signal);
-        border-radius: 3px 13px 13px 13px;
-        box-shadow: 0 3px 12px rgba(55, 48, 39, 0.035);
+        border-radius: 10px;
+        padding: 1rem 1.3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
     }
-    .st-key-ingest_panel [data-testid="stVerticalBlock"] {
-        gap: 0.38rem !important;
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-dim);
     }
-    .ingest-heading,
+    .stat-value {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--text-strong);
+    }
+    .stat-value small {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-dim);
+        margin-left: 0.25rem;
+    }
+
+    /* Ingest Panel */
+    .st-key-ingest_panel {
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 12px !important;
+        padding: 1.3rem 1.6rem !important;
+    }
+    .ingest-heading {
+        display: flex;
+        align-items: center;
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-strong);
+        margin-bottom: 0.9rem !important;
+    }
+    .ingest-heading span {
+        color: var(--red);
+    }
+
+    /* Streamlit File Uploader */
+    [data-testid="stFileUploader"] {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    [data-testid="stFileUploader"] section {
+        min-height: 5.4rem !important;
+        padding: 1.1rem 1.5rem !important;
+        background: #141720 !important;
+        border: 1.5px dashed #363C4E !important;
+        border-radius: 10px !important;
+        transition: all 0.2s ease;
+    }
+    [data-testid="stFileUploader"] section:hover {
+        border-color: var(--red) !important;
+        background: #181C26 !important;
+    }
+    [data-testid="stFileUploader"] section svg,
+    [data-testid="stFileUploader"] section [data-testid="stIconMaterial"] {
+        color: var(--red) !important;
+        fill: var(--red) !important;
+        width: 28px !important;
+        height: 28px !important;
+    }
+    [data-testid="stFileUploader"] section [data-testid="stMarkdownContainer"] p,
+    [data-testid="stFileUploader"] section [data-testid="stBaseButton-secondary"] + div p {
+        color: #FFFFFF !important;
+        font-size: 0.98rem !important;
+        font-weight: 700 !important;
+    }
+    [data-testid="stFileUploader"] section [data-testid="stMarkdownContainer"] small,
+    [data-testid="stFileUploader"] section small,
+    [data-testid="stFileUploader"] section [data-testid="stMarkdownContainer"] span {
+        color: #B5BDCC !important;
+        font-size: 0.84rem !important;
+        font-weight: 600 !important;
+    }
+    /* Streamlit nests the dropzone copy differently across versions. Keep
+       both lines readable even when they are rendered as plain divs. */
+    [data-testid="stFileUploader"] section [data-testid="stFileUploaderDropzoneInstructions"] * {
+        color: #F8FAFC !important;
+    }
+    [data-testid="stFileUploader"] section [data-testid="stFileUploaderDropzoneInstructions"] > div:last-child,
+    [data-testid="stFileUploader"] section [data-testid="stFileUploaderDropzoneInstructions"] > div:last-child * {
+        color: #C5CDDA !important;
+        font-size: 0.84rem !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stFileUploader"] button {
+        background: var(--surface-soft) !important;
+        color: #FFFFFF !important;
+        border: 1px solid #363C4E !important;
+        border-radius: 6px !important;
+        font-weight: 700 !important;
+        font-size: 0.84rem !important;
+        padding: 0.45rem 1.1rem !important;
+        transition: all 0.15s ease !important;
+    }
+    [data-testid="stFileUploader"] button:hover {
+        border-color: var(--red) !important;
+        color: #FFFFFF !important;
+        background: var(--red) !important;
+    }
+
+    /* Register Heading & Controls */
     .register-heading {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        font-family: 'DM Mono', monospace;
-        font-size: 0.58rem;
-        font-weight: 500;
-        letter-spacing: 0.09em;
-        text-transform: uppercase;
-        color: var(--text-dim);
-    }
-    .ingest-heading span:first-child,
-    .register-heading span:first-child {
-        color: var(--signal);
-    }
-    .st-key-ingest_panel [data-testid="stFileUploader"] section {
-        min-height: 4.3rem !important;
-        padding: 0.65rem 0.8rem !important;
-        background: #FAF8F2 !important;
-        border: 1px dashed #C8BFB0 !important;
-        border-radius: 8px !important;
-    }
-    .st-key-ingest_panel [data-testid="stFileUploader"] section:hover {
-        border-color: var(--signal) !important;
-    }
-    .st-key-ingest_panel [data-testid="stFileUploader"] button {
-        background: transparent !important;
-        color: var(--signal) !important;
-        border: 1px solid #CFA58F !important;
-        border-radius: 6px !important;
-    }
-
-    .register-heading {
-        justify-content: flex-start;
         gap: 0.75rem;
-        padding-top: 0.3rem;
+        font-size: 0.95rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         color: var(--text-strong);
     }
-    .register-heading span:last-child {
-        padding: 0.1rem 0.42rem;
+    .register-heading span:first-child {
+        color: var(--red);
+    }
+    .register-count-pill {
+        padding: 0.18rem 0.6rem;
         background: var(--surface-soft);
+        border: 1px solid var(--border);
         border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
         color: var(--text-body);
     }
 
-    [data-testid="stTextInputRootElement"] {
-        background: var(--surface) !important;
-        border-color: var(--border) !important;
+    /* Search & Inputs */
+    [data-testid="stTextInputRootElement"],
+    .stTextInput input {
+        border-radius: 8px !important;
+        border: 1px solid #2F3546 !important;
+        background: #161822 !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        color: #FFFFFF !important;
         box-shadow: none !important;
     }
-
-    .st-key-object_register {
-        padding: 0 0.75rem 0.25rem;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 3px 12px rgba(55, 48, 39, 0.025);
-    }
-    .st-key-object_register > div > [data-testid="stVerticalBlock"] {
-        gap: 0 !important;
-    }
-    .list-header {
-        margin: 0 -0.75rem !important;
-        padding: 0.6rem 1.25rem !important;
-        background: var(--surface-soft) !important;
-        border: 0 !important;
-        border-bottom: 1px solid var(--border) !important;
-        color: var(--text-body) !important;
-    }
-    .file-name-block {
-        min-height: 2.55rem !important;
-        padding-left: 0.15rem !important;
-    }
-    .file-ext-icon {
-        width: 33px !important;
-        color: var(--signal) !important;
-    }
-    .file-name-text { color: var(--text-strong) !important; }
-    .status-active { color: var(--text-body) !important; }
-    .row-rule {
-        height: 1px;
-        background: var(--border);
-        margin: 0 -0.1rem;
-    }
-
-    .st-key-object_register div[data-testid="stPopover"] button {
-        color: var(--text-dim) !important;
-        -webkit-text-fill-color: var(--text-dim) !important;
-        font-size: 0.76rem !important;
-    }
-
-    @media (max-width: 780px) {
-        .ingest-heading span:last-child { display: none; }
-        .st-key-ingest_panel { margin-top: 0.45rem; }
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-# Final layout layer: centered, calm, and deliberately sparse.
-st.markdown(
-    """
-    <style>
-    :root {
-        --canvas: #F5F3ED;
-        --surface: #FCFBF7;
-        --border: #D6D8D2;
-        --text-strong: #17363D;
-        --text-body: #52686C;
-        --text-dim: #829092;
-        --ocean: #173F49;
-        --signal: #D96845;
-    }
-
-    .stApp { background: var(--canvas) !important; }
-
-    [data-testid="stMainBlockContainer"],
-    .main .block-container {
-        width: calc(100% - 3rem) !important;
-        max-width: 1180px !important;
-        margin: 0 auto !important;
-        padding: 1.65rem 0 0.75rem !important;
-    }
-
-    [data-testid="stVerticalBlock"] { gap: 0.7rem !important; }
-
-    .brand-cluster { gap: 0.65rem; }
-    .brand-mark {
-        width: 25px;
-        height: 25px;
-        font-size: 0.57rem;
-        background: var(--ocean);
-    }
-    .brand-title { font-size: 0.92rem; font-weight: 650; }
-
-    .masthead {
-        padding: 1.15rem 0 0.15rem !important;
-        margin: 0 !important;
-    }
-    .masthead-title {
-        font-size: 2.5rem !important;
-        line-height: 1 !important;
-        letter-spacing: -0.055em !important;
-        font-weight: 580 !important;
-    }
-
-    [data-testid="stTextInputRootElement"] {
-        min-height: 2.55rem !important;
-        background: var(--surface) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 8px !important;
-        box-shadow: 0 1px 0 rgba(23, 63, 73, 0.02) !important;
+    .stTextInput input:focus {
+        border-color: var(--red) !important;
+        box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.2) !important;
     }
     [data-testid="stTextInputRootElement"] input {
-        padding-left: 0.85rem !important;
-        font-size: 0.8rem !important;
+        padding: 0.58rem 1rem !important;
+    }
+    .stTextInput input::placeholder,
+    [data-testid="stTextInputRootElement"] input::placeholder {
+        color: #8E97A8 !important;
+        opacity: 1 !important;
+        font-weight: 500 !important;
     }
 
-    div[data-testid="stPopover"] button,
-    div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"] {
-        min-height: 2rem !important;
-        background: transparent !important;
-        border: 0 !important;
+    /* Table Container */
+    .st-key-object_register {
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        padding: 0.4rem !important;
+        margin-top: 0.25rem !important;
+    }
+    .st-key-object_register > div > [data-testid="stVerticalBlock"] {
+        gap: 0.25rem !important;
+    }
+
+    /* Table Rows */
+    .st-key-object_register [data-testid="stHorizontalBlock"] {
+        padding: 0.85rem 1.25rem !important;
+        background-color: transparent !important;
+        border-radius: 8px !important;
+        border: none !important;
+        align-items: center !important;
+        transition: background-color 0.15s ease;
+    }
+    .st-key-object_register [data-testid="stHorizontalBlock"]:hover {
+        background-color: var(--surface-hover) !important;
+    }
+
+    /* Table Header */
+    .st-key-object_register [data-testid="stHorizontalBlock"]:first-child {
+        background-color: var(--surface-soft) !important;
+        padding: 0.75rem 1.25rem !important;
+        border: none !important;
+        margin-bottom: 0.2rem !important;
+    }
+    .st-key-object_register [data-testid="stHorizontalBlock"]:first-child:hover {
+        background-color: var(--surface-soft) !important;
+    }
+
+    .header-cell {
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+    }
+
+    /* File Identity */
+    .file-name-block {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+    .file-ext-badge {
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 0.25rem 0.55rem;
+        border-radius: 6px;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        color: var(--red);
+        text-transform: uppercase;
+        flex-shrink: 0;
+        min-width: 40px;
+        text-align: center;
+    }
+    .file-info-block {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .file-name-text {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-strong);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.3;
+    }
+    .file-desc-sub {
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--text-body);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.3;
+        margin-top: 0.15rem;
+    }
+
+    .cell-data {
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: var(--text-body);
+        line-height: 1.2;
+    }
+
+    /* Popover Action Button - Center aligned */
+    .st-key-object_register div[data-testid="stPopover"] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+    }
+    .st-key-object_register div[data-testid="stPopover"] button {
+        min-height: 32px !important;
+        height: 32px !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 auto !important;
+        background: var(--surface-soft) !important;
+        border: 1px solid var(--border) !important;
         border-radius: 6px !important;
         color: var(--text-body) !important;
-        -webkit-text-fill-color: var(--text-body) !important;
         box-shadow: none !important;
-        padding: 0.2rem 0.35rem !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        position: relative !important;
     }
-    div[data-testid="stPopover"] button svg { display: none !important; }
-
-    .st-key-new_file_control div[data-testid="stPopover"] button,
-    .st-key-new_file_control div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"] {
+    .st-key-object_register div[data-testid="stPopover"] button:hover {
+        background: var(--red) !important;
+        border-color: var(--red) !important;
+        color: #FFFFFF !important;
+    }
+    .st-key-object_register div[data-testid="stPopover"] [data-testid="stIconMaterial"],
+    .st-key-object_register div[data-testid="stPopover"] svg {
+        display: none !important;
+    }
+    .st-key-object_register div[data-testid="stPopover"] button p {
+        font-size: 1.25rem !important;
+        font-weight: 800 !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        text-align: center !important;
+        position: absolute !important;
+        inset: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .st-key-object_register div[data-testid="stPopover"] button > div[data-testid="stMarkdownContainer"] {
         width: 100% !important;
-        min-height: 2.55rem !important;
-        background: var(--ocean) !important;
-        border: 1px solid var(--ocean) !important;
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        font-family: 'Instrument Sans', sans-serif !important;
-        font-size: 0.78rem !important;
-        font-weight: 600 !important;
-    }
-    .st-key-new_file_control div[data-testid="stPopover"] button:hover {
-        background: #24545D !important;
-        border-color: #24545D !important;
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
+    /* COMPACT 2-OPTION CONTEXT MENU POPOVER */
+    div[data-testid="stPopoverBody"],
+    [data-testid="stPopoverBody"],
+    div[data-testid="stPopoverBody"] > div {
+        background: #14161F !important;
+        background-color: #14161F !important;
+        border: 1px solid #282E40 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85) !important;
+        color: #FFFFFF !important;
+    }
+    div[data-testid="stPopoverBody"] {
+        padding: 0.75rem !important;
+        min-width: 170px !important;
+        max-width: 210px !important;
+    }
+    div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] {
+        gap: 0.45rem !important;
+    }
+    div[data-testid="stPopoverBody"] a[data-testid="stLinkButton"],
+    div[data-testid="stPopoverBody"] a[data-testid="stLinkButton"] > span,
+    div[data-testid="stPopoverBody"] a[data-testid="stBaseButton-secondary"] {
+        background: #1C202C !important;
+        background-color: #1C202C !important;
+        border: 1px solid #2F3548 !important;
+        color: #FFFFFF !important;
+        border-radius: 6px !important;
+        font-weight: 700 !important;
+        font-size: 0.82rem !important;
+        padding: 0.4rem 0.6rem !important;
+        text-align: center !important;
+        display: block !important;
+        transition: all 0.15s ease !important;
+    }
+    div[data-testid="stPopoverBody"] a[data-testid="stLinkButton"]:hover {
+        background: #272C3D !important;
+        border-color: #434B64 !important;
+        color: #FFFFFF !important;
+    }
+    div[data-testid="stPopoverBody"] button[kind="primary"] {
+        background: rgba(229, 62, 62, 0.16) !important;
+        border: 1px solid rgba(229, 62, 62, 0.4) !important;
+        color: #FF5A5A !important;
+        border-radius: 6px !important;
+        font-weight: 700 !important;
+        font-size: 0.82rem !important;
+        padding: 0.4rem 0.6rem !important;
+        transition: all 0.15s ease !important;
+    }
+    div[data-testid="stPopoverBody"] button[kind="primary"]:hover {
+        background: #E53E3E !important;
+        border-color: #E53E3E !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Standard Buttons */
+    .stButton > button {
+        border-radius: 7px !important;
+        font-weight: 700 !important;
+        font-size: 0.84rem !important;
+        border: 1px solid var(--border) !important;
+        color: var(--text-strong) !important;
+        background: var(--surface-soft) !important;
+        transition: all 0.15s ease !important;
+    }
+    .stButton > button:hover {
+        background: var(--surface-hover) !important;
+        border-color: #3B4254 !important;
+        color: #FFFFFF !important;
+    }
+    .stButton > button[kind="primary"] {
+        background: var(--red) !important;
+        border-color: var(--red) !important;
+        color: white !important;
+    }
+    .stButton > button[kind="primary"]:hover {
+        background: var(--red-hover) !important;
+        border-color: var(--red-hover) !important;
+    }
+
+    /* Pagination */
     .index-count {
-        padding: 0.3rem 0 0.15rem !important;
-        font-size: 0.58rem !important;
-        color: var(--text-dim) !important;
-    }
-
-    .list-wrapper { overflow: visible; }
-    .list-header {
-        grid-template-columns: 5.2fr 0.8fr 1.8fr 0.8fr 0.35fr;
-        padding: 0.58rem 0.65rem !important;
-        border-top: 1px solid var(--border) !important;
-        border-bottom: 1px solid var(--border) !important;
-        background: rgba(255, 255, 255, 0.28) !important;
-        color: var(--text-dim) !important;
-        font-size: 0.57rem !important;
-    }
-
-    .file-name-block { padding-left: 0.55rem; min-height: 2.55rem; }
-    .file-ext-icon {
-        width: 31px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         color: var(--text-dim);
-        font-size: 0.55rem;
     }
-    .file-name-text { font-size: 0.8rem; font-weight: 600; }
-    .file-desc-sub { font-size: 0.67rem; }
-    .cell-mono { font-size: 0.64rem; }
-    .status-label { font-size: 0.59rem; }
+
+    .empty-notice {
+        padding: 4rem 2rem;
+        text-align: center;
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
 
     @media (max-width: 780px) {
-        [data-testid="stMainBlockContainer"], .main .block-container {
-            width: calc(100% - 1.25rem) !important;
+        [data-testid="stMainBlockContainer"],
+        .main .block-container {
+            padding: 1.25rem 1rem 3rem !important;
+            width: 100% !important;
         }
-        .masthead-title { font-size: 2rem !important; }
+        .brand-title {
+            font-size: 1.5rem;
+        }
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
     }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-st.markdown(
-    """
-    <style>
-    :root {
-        --canvas: #F3F0E8;
-        --surface: #FFFEFA;
-        --surface-soft: #ECE7DD;
-        --border: #D8D1C3;
-        --text-strong: #252C2D;
-        --text-body: #536164;
-        --text-dim: #7B8787;
-        --ocean: #263F43;
-        --signal: #B95E3E;
-    }
-    .stApp { background: var(--canvas) !important; }
-    [data-testid="stMainBlockContainer"], .main .block-container {
-        max-width: 1220px !important;
-        padding-top: 1.45rem !important;
-    }
-    .brand-mark {
-        width: 31px !important;
-        height: 31px !important;
-        border-radius: 8px 8px 8px 2px !important;
-        background: var(--signal) !important;
-        box-shadow: 3px 3px 0 #D9C6B4 !important;
-    }
-    .list-header {
-        margin: 0 -0.75rem !important;
-        padding: 0.6rem 1.25rem !important;
-        background: var(--surface-soft) !important;
-        border: 0 !important;
-        border-bottom: 1px solid var(--border) !important;
-        color: var(--text-body) !important;
-    }
-    .file-ext-icon { color: var(--signal) !important; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -799,8 +594,7 @@ def render_upload_panel(service: FileService) -> None:
         st.markdown(
             """
             <div class="ingest-heading">
-                <span>01 / Ingest</span>
-                <span>PDF · IMAGE · TEXT · DATA&nbsp;&nbsp; / &nbsp;&nbsp;10 MB MAX</span>
+                <span>01 / Ingest Object</span>
             </div>
             """,
             unsafe_allow_html=True,
@@ -815,15 +609,15 @@ def render_upload_panel(service: FileService) -> None:
         if uploaded_file is None:
             return
 
-        note_col, action_col = st.columns([5, 1], vertical_alignment="bottom")
+        note_col, action_col = st.columns([5, 1.2], vertical_alignment="bottom")
         with note_col:
             file_note = st.text_input(
                 "Field note",
-                placeholder="Add context (optional)",
+                placeholder="Add description or metadata notes (optional)",
                 label_visibility="collapsed",
             )
         with action_col:
-            archive_clicked = st.button("Archive file", type="primary", use_container_width=True)
+            archive_clicked = st.button("Ingest Object", type="primary", use_container_width=True)
 
         if archive_clicked:
             if uploaded_file.size > service.settings.max_file_size_bytes:
@@ -832,9 +626,9 @@ def render_upload_panel(service: FileService) -> None:
 
             temp_path = upload_to_temp(uploaded_file)
             try:
-                with st.spinner("Validating…"):
+                with st.spinner("Ingesting to Supabase Storage…"):
                     service.create_file(str(temp_path), description=file_note.strip() or None)
-                st.toast("Archived.", icon="✓")
+                st.toast("Object ingested successfully.", icon="⚡")
                 st.rerun()
             except Exception as error:
                 st.error(f"Upload rejected: {error}")
@@ -843,13 +637,32 @@ def render_upload_panel(service: FileService) -> None:
 
 
 def main() -> None:
+    # Official Supabase SVG logo + StorageDocker Masthead
+    supabase_svg = """<svg width="24" height="24" viewBox="0 0 109 113" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M63.7076 110.284C60.848 113.885 55.0502 111.912 54.9813 107.314L53.9738 40.0667H97.3849C102.133 40.0667 104.887 45.4277 102.047 49.2222L63.7076 110.284Z" fill="url(#sb_gradient)"/>
+<path d="M63.7076 110.284C60.848 113.885 55.0502 111.912 54.9813 107.314L53.9738 40.0667H97.3849C102.133 40.0667 104.887 45.4277 102.047 49.2222L63.7076 110.284Z" fill="black" fill-opacity="0.2"/>
+<path d="M45.297 2.71556C48.1566 -0.885444 53.9544 1.08779 54.0233 5.68595L54.4442 72.9333H11.6151C6.8669 72.9333 4.11299 67.5723 6.95304 63.7778L45.297 2.71556Z" fill="#3ECF8E"/>
+<defs>
+<linearGradient id="sb_gradient" x1="53.9738" y1="54.9999" x2="94.4635" y2="73.8417" gradientUnits="userSpaceOnUse">
+<stop stop-color="#249361"/>
+<stop offset="1" stop-color="#3ECF8E"/>
+</linearGradient>
+</defs>
+</svg>"""
+
     st.markdown(
-        """
-        <div class="brand-cluster">
-            <div class="brand-mark">T/</div>
-            <div class="brand-copy">
-                <span class="brand-title">Tideframe</span>
-                <span class="brand-subtitle">Supabase object register</span>
+        f"""
+        <div class="brand-masthead">
+            <div class="brand-cluster">
+                <div class="supabase-logo-mark">
+                    {supabase_svg}
+                </div>
+                <div class="brand-copy">
+                    <div class="brand-title">Storage<span>Docker</span></div>
+                    <div class="brand-tagline">
+                        Enterprise Object Storage Registry
+                    </div>
+                </div>
             </div>
         </div>
         """,
@@ -863,17 +676,45 @@ def main() -> None:
         st.info("Check .env credentials.")
         st.stop()
 
-    render_upload_panel(service)
-
     records = service.list_files()
 
-    register_col, search_col = st.columns([5, 2.2], vertical_alignment="center")
+    # Metrics Summary
+    total_bytes = sum(r.get("size_bytes") or 0 for r in records)
+    total_count = len(records)
+    latest_date = format_iso(records[0].get("created_at")) if records else "None"
+    st.markdown(
+        f"""
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total Objects</span>
+                <span class="stat-value">{total_count:02d} <small>files</small></span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Storage</span>
+                <span class="stat-value">{human_size(total_bytes)}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Latest Upload</span>
+                <span class="stat-value" style="font-size: 0.95rem; font-weight: 700;">{latest_date}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Cloud Backend</span>
+                <span class="stat-value" style="font-size: 0.95rem; font-weight: 700; color: #3ECF8E;">Supabase Storage</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    render_upload_panel(service)
+
+    register_col, search_col = st.columns([5, 2.5], vertical_alignment="center")
     with register_col:
         st.markdown(
             f"""
             <div class="register-heading">
-                <span>02 / Object register</span>
-                <span>{len(records):02d}</span>
+                <span>02 / Object Register</span>
+                <span class="register-count-pill">{len(records):02d} OBJECTS</span>
             </div>
             """,
             unsafe_allow_html=True,
@@ -881,7 +722,7 @@ def main() -> None:
     with search_col:
         search = st.text_input(
             "Search",
-            placeholder="Find an object",
+            placeholder="Search by name, note, or format…",
             label_visibility="collapsed",
         ).strip().lower()
 
@@ -892,19 +733,20 @@ def main() -> None:
             if search in f"{r.get('original_name', '')} {r.get('description', '')} {r.get('content_type', '')}".lower()
         ]
 
+    # Table Box Container
+    table_box = st.container(key="object_register")
+
     if not filtered:
-        st.markdown(
+        table_box.markdown(
             """
-            <div class="list-wrapper">
-                <div class="empty-notice">No records match the current filter.</div>
-            </div>
+            <div class="empty-notice">No objects match the current search query.</div>
             """,
             unsafe_allow_html=True,
         )
         return
 
-    # Keep the shell within one viewport by paging instead of growing vertically.
-    page_size = 5
+    # Pagination calculation
+    page_size = 6
     page_count = max(1, (len(filtered) + page_size - 1) // page_size)
     filter_fingerprint = search
     if st.session_state.get("archive_filter") != filter_fingerprint:
@@ -916,129 +758,84 @@ def main() -> None:
     page_records = filtered[page_start : page_start + page_size]
     page_end = page_start + len(page_records)
 
-    if page_count > 1:
-        index_col, previous_col, next_col = st.columns([10, 0.5, 0.5], vertical_alignment="center")
-        with index_col:
-            st.markdown(
-                f'<div class="index-count">{page_start + 1:02d}–{page_end:02d} / {len(filtered):02d}</div>',
-                unsafe_allow_html=True,
+    # Column proportions: center action column
+    col_weights = [5.6, 1.4, 2.2, 0.8]
+
+    # Render Table Header (inside table_box)
+    with table_box:
+        hdr_cols = st.columns(col_weights, vertical_alignment="center")
+        hdr_cols[0].markdown('<div class="header-cell">Document & Notes</div>', unsafe_allow_html=True)
+        hdr_cols[1].markdown('<div class="header-cell">File Size</div>', unsafe_allow_html=True)
+        hdr_cols[2].markdown('<div class="header-cell">Uploaded Date</div>', unsafe_allow_html=True)
+        hdr_cols[3].markdown('<div class="header-cell" style="text-align: center;">Actions</div>', unsafe_allow_html=True)
+
+        # Render Table Rows
+        for r in page_records:
+            rec_id = r["id"]
+            orig_name = r.get("original_name") or "unnamed"
+            ext = Path(orig_name).suffix.lstrip(".") or "txt"
+            size_str = human_size(r.get("size_bytes"))
+            date_str = format_iso(r.get("created_at"))
+            desc = r.get("description")
+
+            desc_html = (
+                f'<div class="file-desc-sub">{escape(desc)}</div>'
+                if desc
+                else '<div class="file-desc-sub" style="color: var(--text-subtle);">No field note</div>'
             )
-        with previous_col:
-            if st.button("←", key="archive_previous", disabled=current_page == 0, use_container_width=True):
-                st.session_state.archive_page = current_page - 1
-                st.rerun()
-        with next_col:
-            if st.button("→", key="archive_next", disabled=current_page >= page_count - 1, use_container_width=True):
-                st.session_state.archive_page = current_page + 1
-                st.rerun()
 
-    # Table Header
-    table_box = st.container(key="object_register")
-    table_box.markdown(
-        """
-        <div class="list-wrapper">
-            <div class="list-header">
-                <div>Document</div>
-                <div>Size</div>
-                <div>Added</div>
-                <div>Status</div>
-                <div></div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # Table Rows
-    for r in page_records:
-        rec_id = r["id"]
-        orig_name = r.get("original_name") or "unnamed"
-        ext = Path(orig_name).suffix.lstrip(".") or "txt"
-        size_str = human_size(r.get("size_bytes"))
-        date_str = format_iso(r.get("created_at"))
-        status_val = (r.get("status") or "pending").lower()
-        desc = r.get("description")
-
-        if status_val == "active":
-            status_html = '<span class="status-label status-active">Active</span>'
-        elif status_val == "rejected":
-            status_html = '<span class="status-label status-rejected">Rejected</span>'
-        else:
-            status_html = '<span class="status-label status-pending">Pending</span>'
-
-        desc_html = f'<div class="file-desc-sub">{escape(desc)}</div>' if desc else '<div class="file-desc-sub" style="color: var(--text-subtle);">No field note</div>'
-
-        cols = table_box.columns([5.2, 0.8, 1.8, 0.8, 0.35])
-        with cols[0]:
-            st.markdown(
-                f"""
-                <div class="file-name-block">
-                    <div class="file-ext-icon">{ext[:4]}</div>
-                    <div style="overflow: hidden;">
-                        <div class="file-name-text">{escape(orig_name)}</div>
-                        {desc_html}
+            cols = st.columns(col_weights, vertical_alignment="center")
+            with cols[0]:
+                st.markdown(
+                    f"""
+                    <div class="file-name-block">
+                        <div class="file-ext-badge">{ext[:4]}</div>
+                        <div class="file-info-block">
+                            <div class="file-name-text" title="{escape(orig_name)}">{escape(orig_name)}</div>
+                            {desc_html}
+                        </div>
                     </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        with cols[1]:
-            st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-mono'>{size_str}</div>", unsafe_allow_html=True)
-        with cols[2]:
-            st.markdown(f"<div style='padding-top: 0.45rem;' class='cell-mono'>{date_str}</div>", unsafe_allow_html=True)
-        with cols[3]:
-            st.markdown(f"<div style='padding-top: 0.45rem;'>{status_html}</div>", unsafe_allow_html=True)
-        with cols[4]:
-            action_popover = st.popover("···", use_container_width=True)
-            with action_popover:
-                st.markdown(f"**{escape(orig_name)}**")
-                try:
-                    signed_url = service.create_signed_url(rec_id)
-                    st.link_button("Download object", signed_url, use_container_width=True)
-                except Exception:
-                    st.caption("Download link unavailable")
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with cols[1]:
+                st.markdown(f"<div class='cell-data'>{size_str}</div>", unsafe_allow_html=True)
+            with cols[2]:
+                st.markdown(f"<div class='cell-data'>{date_str}</div>", unsafe_allow_html=True)
+            with cols[3]:
+                action_popover = st.popover("⋮", use_container_width=True)
+                with action_popover:
+                    # Clean 2-Option Context Menu: Download & Delete
+                    try:
+                        signed_url = service.create_signed_url(rec_id)
+                        st.link_button("Download", signed_url, use_container_width=True)
+                    except Exception:
+                        st.caption("Download unavailable")
 
-                st.divider()
-
-                with st.form(f"note_form_{rec_id}"):
-                    st.caption("Edit label and field note")
-                    new_n = st.text_input("Name", value=orig_name, key=f"nm_{rec_id}")
-                    new_d = st.text_area("Note", value=desc or "", height=60, key=f"nt_{rec_id}")
-                    if st.form_submit_button("Save Updates", use_container_width=True):
+                    if st.button("Delete", key=f"del_{rec_id}", type="primary", use_container_width=True):
                         try:
-                            service.update_metadata(rec_id, description=new_d.strip() or None, original_name=new_n.strip() or None)
-                            st.toast("Record updated.", icon="✓")
+                            service.delete_file(rec_id)
+                            st.toast("Object deleted.")
                             st.rerun()
                         except Exception as err:
                             st.error(str(err))
 
-                st.divider()
-
-                with st.expander("Replace payload"):
-                    rf = st.file_uploader("Candidate file", type=["pdf", "png", "jpg", "jpeg", "webp", "gif", "txt", "csv", "json", "docx"], key=f"rf_{rec_id}")
-                    if st.button("Swap & Revalidate", key=f"rbtn_{rec_id}", use_container_width=True):
-                        if rf:
-                            tp = upload_to_temp(rf)
-                            try:
-                                service.replace_file(rec_id, str(tp))
-                                st.toast("Replacement validated.", icon="✓")
-                                st.rerun()
-                            except Exception as err:
-                                st.error(str(err))
-                            finally:
-                                tp.unlink(missing_ok=True)
-
-                st.divider()
-
-                if st.button("Delete Permanently", key=f"del_{rec_id}", type="primary", use_container_width=True):
-                    try:
-                        service.delete_file(rec_id)
-                        st.toast("Object removed.")
-                        st.rerun()
-                    except Exception as err:
-                        st.error(str(err))
-
-        table_box.markdown("<div class='row-rule'></div>", unsafe_allow_html=True)
+    # Pagination controls below table
+    if page_count > 1:
+        pag_col1, pag_col2, pag_col3 = st.columns([8, 1.2, 1.2], vertical_alignment="center")
+        with pag_col1:
+            st.markdown(
+                f'<div class="index-count">{page_start + 1:02d}–{page_end:02d} of {len(filtered):02d} objects</div>',
+                unsafe_allow_html=True,
+            )
+        with pag_col2:
+            if st.button("← Previous", key="archive_previous", disabled=current_page == 0, use_container_width=True):
+                st.session_state.archive_page = current_page - 1
+                st.rerun()
+        with pag_col3:
+            if st.button("Next →", key="archive_next", disabled=current_page >= page_count - 1, use_container_width=True):
+                st.session_state.archive_page = current_page + 1
+                st.rerun()
 
 
 if __name__ == "__main__":

@@ -131,6 +131,8 @@ supabase-files list
 
 The project also includes a minimal Streamlit interface called **Tideframe**. It uses a warm archival-ledger visual system with numbered ingest and register sections, a compact upload well, neutral status text, and short-lived signed download links. The composition is intentionally distinct from a conventional blue SaaS file manager while keeping the workflow immediately understandable.
 
+![StorageDocker UI preview](frontend/ui.PNG)
+
 Start it from the project folder:
 
 ```powershell
