@@ -111,7 +111,12 @@ class FileService:
     def get_file(self, record_id: str) -> dict[str, Any]:
         return self._get_record(record_id)
 
-    def create_file(self, local_path: str, description: str | None = None) -> dict[str, Any]:
+    def create_file(
+        self,
+        local_path: str,
+        description: str | None = None,
+        original_name: str | None = None,
+    ) -> dict[str, Any]:
         source = Path(local_path).expanduser().resolve()
         if not source.is_file():
             raise FileNotFoundError(f"File does not exist: {source}")
@@ -122,13 +127,17 @@ class FileService:
                 f"{self.settings.max_file_size_bytes} bytes."
             )
 
-        storage_path = storage_path_for(source.name)
+        display_name = Path(original_name).name.strip() if original_name else source.name
+        if not display_name:
+            display_name = source.name
+
+        storage_path = storage_path_for(display_name)
         content_type = content_type_for(source)
         record = self._insert_record(
             {
                 "bucket_name": self.settings.bucket,
                 "storage_path": storage_path,
-                "original_name": source.name,
+                "original_name": display_name,
                 "uploaded_by": self.settings.app_user,
                 "content_type": content_type,
                 "description": description,
@@ -162,7 +171,7 @@ class FileService:
                     "bucket": self.settings.bucket,
                     "path": storage_path,
                     "mode": "create",
-                    "original_name": source.name,
+                    "original_name": display_name,
                     "content_type": content_type,
                     "description": description,
                     "uploaded_by": self.settings.app_user,

@@ -19,6 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
     create = commands.add_parser("create", help="Upload a file and validate it server-side.")
     create.add_argument("file", help="Local file to upload")
     create.add_argument("--description", help="Optional metadata description")
+    create.add_argument("--name", help="Display/original filename")
 
     commands.add_parser("list", help="List file metadata records.")
 
@@ -47,7 +48,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def run(args: argparse.Namespace, service: FileService) -> object:
     if args.command == "create":
-        return service.create_file(args.file, args.description)
+        return service.create_file(args.file, description=args.description, original_name=args.name)
     if args.command == "list":
         return service.list_files()
     if args.command == "read":

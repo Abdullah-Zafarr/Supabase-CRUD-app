@@ -143,3 +143,35 @@ def test_create_uploads_bytes_then_calls_validator(tmp_path):
     assert record["storage_path"] in fake.objects
     assert fake.upload_options["content-type"] == "text/plain"
 
+
+def test_create_file_with_custom_name_and_update_metadata(tmp_path):
+    source = tmp_path / "temp_upload.png"
+    source.write_bytes(b"\x89PNG\r\n\x1a\n")
+    fake = FakeClient()
+    settings = Settings(
+        supabase_url="https://example.supabase.co",
+        supabase_key="server-key",
+        edge_function_secret="function-secret",
+    )
+    service = FileService(settings, client=fake)
+
+    record = service.create_file(
+        str(source),
+        description="Initial note",
+        original_name="architecture_diagram.png",
+    )
+
+    assert record["original_name"] == "architecture_diagram.png"
+    assert record["description"] == "Initial note"
+
+    # Update metadata (rename and custom field note)
+    updated = service.update_metadata(
+        record["id"],
+        original_name="renamed_diagram.png",
+        description="Updated production architecture note",
+    )
+
+    assert updated["original_name"] == "renamed_diagram.png"
+    assert updated["description"] == "Updated production architecture note"
+
+

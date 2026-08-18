@@ -54,8 +54,12 @@ st.markdown(
         padding: 0;
     }
 
-    [data-testid="stHeader"] {
+    .stAppHeader,
+    header[data-testid="stHeader"],
+    .stApp > header {
+        display: none !important;
         background: transparent !important;
+        background-color: transparent !important;
         height: 0 !important;
         min-height: 0 !important;
     }
@@ -263,6 +267,16 @@ st.markdown(
     }
 
     /* Search & Inputs */
+    [data-testid="stInputInstructions"],
+    .stInputInstructions,
+    div[data-testid="stInputInstructions"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+
     [data-testid="stTextInputRootElement"],
     .stTextInput input {
         border-radius: 8px !important;
@@ -289,20 +303,20 @@ st.markdown(
 
     /* Table Container */
     .st-key-object_register {
-        background: var(--surface) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 12px !important;
+        background: #111319 !important;
+        border: 1px solid #232736 !important;
+        border-radius: 14px !important;
         overflow: hidden !important;
-        padding: 0.4rem !important;
-        margin-top: 0.25rem !important;
+        padding: 0.55rem !important;
+        margin-top: 0.35rem !important;
     }
     .st-key-object_register > div > [data-testid="stVerticalBlock"] {
-        gap: 0.25rem !important;
+        gap: 0.35rem !important;
     }
 
     /* Table Rows */
     .st-key-object_register [data-testid="stHorizontalBlock"] {
-        padding: 0.85rem 1.25rem !important;
+        padding: 0.95rem 1.35rem !important;
         background-color: transparent !important;
         border-radius: 8px !important;
         border: none !important;
@@ -313,23 +327,26 @@ st.markdown(
         background-color: var(--surface-hover) !important;
     }
 
-    /* Table Header */
+    /* Table Header Strip - Spacious & Bold */
     .st-key-object_register [data-testid="stHorizontalBlock"]:first-child {
-        background-color: var(--surface-soft) !important;
-        padding: 0.75rem 1.25rem !important;
-        border: none !important;
-        margin-bottom: 0.2rem !important;
+        background-color: #171A24 !important;
+        padding: 1rem 1.35rem !important;
+        min-height: 48px !important;
+        border-radius: 9px !important;
+        border: 1px solid #262C3E !important;
+        margin-bottom: 0.35rem !important;
     }
     .st-key-object_register [data-testid="stHorizontalBlock"]:first-child:hover {
-        background-color: var(--surface-soft) !important;
+        background-color: #171A24 !important;
     }
 
     .header-cell {
-        font-size: 0.75rem;
-        font-weight: 800;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--text-dim);
+        font-size: 0.8rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        color: #94A3B8 !important;
+        line-height: 1.4 !important;
     }
 
     /* File Identity */
@@ -441,7 +458,7 @@ st.markdown(
         justify-content: center !important;
     }
 
-    /* COMPACT 2-OPTION CONTEXT MENU POPOVER */
+    /* COMPACT CONTEXT MENU POPOVER */
     div[data-testid="stPopoverBody"],
     [data-testid="stPopoverBody"],
     div[data-testid="stPopoverBody"] > div {
@@ -454,12 +471,13 @@ st.markdown(
     }
     div[data-testid="stPopoverBody"] {
         padding: 0.75rem !important;
-        min-width: 170px !important;
-        max-width: 210px !important;
+        min-width: 175px !important;
+        max-width: 220px !important;
     }
     div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] {
         gap: 0.45rem !important;
     }
+    div[data-testid="stPopoverBody"] button,
     div[data-testid="stPopoverBody"] a[data-testid="stLinkButton"],
     div[data-testid="stPopoverBody"] a[data-testid="stLinkButton"] > span,
     div[data-testid="stPopoverBody"] a[data-testid="stBaseButton-secondary"] {
@@ -473,8 +491,10 @@ st.markdown(
         padding: 0.4rem 0.6rem !important;
         text-align: center !important;
         display: block !important;
+        width: 100% !important;
         transition: all 0.15s ease !important;
     }
+    div[data-testid="stPopoverBody"] button:hover,
     div[data-testid="stPopoverBody"] a[data-testid="stLinkButton"]:hover {
         background: #272C3D !important;
         border-color: #434B64 !important;
@@ -484,16 +504,177 @@ st.markdown(
         background: rgba(229, 62, 62, 0.16) !important;
         border: 1px solid rgba(229, 62, 62, 0.4) !important;
         color: #FF5A5A !important;
-        border-radius: 6px !important;
-        font-weight: 700 !important;
-        font-size: 0.82rem !important;
-        padding: 0.4rem 0.6rem !important;
-        transition: all 0.15s ease !important;
     }
     div[data-testid="stPopoverBody"] button[kind="primary"]:hover {
         background: #E53E3E !important;
         border-color: #E53E3E !important;
         color: #FFFFFF !important;
+    }
+
+    /* Dialog Overlay & Backdrop - Translucent Frosted Glass */
+    div[data-baseweb="modal"],
+    div[data-baseweb="backdrop"],
+    div[data-testid="stDialogOverlay"],
+    div[data-testid="stBackdrop"],
+    [data-testid="stDialog"],
+    [data-testid="stModal"],
+    section[data-testid="stModal"],
+    dialog::backdrop {
+        background: rgba(11, 12, 14, 0.65) !important;
+        background-color: rgba(11, 12, 14, 0.65) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+    }
+
+    /* Intermediate full-screen modal containers - MUST BE TRANSPARENT */
+    div[data-baseweb="modal"] > div,
+    [data-testid="stDialog"] > div,
+    [data-testid="stModal"] > div,
+    section[data-testid="stModal"] > div {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Modal / Dialog Window Card */
+    div[role="dialog"],
+    [data-baseweb="modal-body"] {
+        background: #13151D !important;
+        background-color: #13151D !important;
+        border: 1px solid #2F364A !important;
+        border-radius: 14px !important;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95) !important;
+        color: #FFFFFF !important;
+    }
+    div[role="dialog"] h2,
+    div[role="dialog"] h1,
+    div[role="dialog"] h3,
+    div[role="dialog"] [data-testid="stHeadingWithActionElements"] *,
+    [data-testid="stDialog"] h2,
+    [data-testid="stDialog"] h1,
+    [data-testid="stDialog"] [data-testid="stDialogTitle"] {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-size: 1.3rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.01em !important;
+        opacity: 1 !important;
+    }
+    div[role="dialog"] button[aria-label="Close"],
+    [data-testid="stDialog"] button[aria-label="Close"],
+    [data-testid="stDialog"] svg {
+        color: #FFFFFF !important;
+        fill: #FFFFFF !important;
+        opacity: 0.8 !important;
+    }
+    div[role="dialog"] button[aria-label="Close"]:hover {
+        opacity: 1 !important;
+        color: #EF4444 !important;
+    }
+    div[role="dialog"] label,
+    [data-testid="stDialog"] label,
+    div[role="dialog"] label p,
+    [data-testid="stDialog"] label p {
+        color: #F8FAFC !important;
+        font-size: 0.9rem !important;
+        font-weight: 700 !important;
+        opacity: 1 !important;
+    }
+    div[role="dialog"] textarea,
+    div[role="dialog"] input,
+    [data-testid="stDialog"] textarea,
+    [data-testid="stDialog"] input {
+        background: #181B26 !important;
+        background-color: #181B26 !important;
+        border: 1px solid #384158 !important;
+        border-radius: 8px !important;
+        color: #FFFFFF !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        padding: 0.62rem 0.85rem !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        box-sizing: border-box !important;
+    }
+    div[role="dialog"] textarea,
+    [data-testid="stDialog"] textarea {
+        height: 110px !important;
+        min-height: 110px !important;
+    }
+    div[role="dialog"] textarea:focus,
+    div[role="dialog"] input:focus,
+    [data-testid="stDialog"] textarea:focus,
+    [data-testid="stDialog"] input:focus {
+        border-color: #EF4444 !important;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
+        background: #1E2232 !important;
+        color: #FFFFFF !important;
+    }
+    div[role="dialog"] textarea::placeholder,
+    div[role="dialog"] input::placeholder,
+    [data-testid="stDialog"] textarea::placeholder,
+    [data-testid="stDialog"] input::placeholder {
+        color: #A0ABC0 !important;
+        opacity: 1 !important;
+        font-weight: 500 !important;
+    }
+    [data-testid="stDialog"] [data-testid="stHorizontalBlock"],
+    .st-key-ingest_panel [data-testid="stHorizontalBlock"] {
+        align-items: center !important;
+        gap: 0.5rem !important;
+    }
+    [data-testid="stDialog"] [data-testid="stColumn"],
+    .st-key-ingest_panel [data-testid="stColumn"] {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+    [data-testid="stDialog"] [data-testid="stElementContainer"],
+    .st-key-ingest_panel [data-testid="stElementContainer"] {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    [data-testid="stDialog"] [data-testid="stTextInput"],
+    .st-key-ingest_panel [data-testid="stTextInput"] {
+        margin: 0 !important;
+    }
+    [data-testid="stDialog"] [data-testid="stMarkdownContainer"] p,
+    .st-key-ingest_panel [data-testid="stMarkdownContainer"] p {
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+    }
+    [data-testid="stDialog"] .stMarkdown,
+    [data-testid="stDialog"] [data-testid="stMarkdownContainer"],
+    .st-key-ingest_panel .stMarkdown,
+    .st-key-ingest_panel [data-testid="stMarkdownContainer"] {
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .modal-locked-ext {
+        background: #181B26 !important;
+        border: 1px solid #384158 !important;
+        border-radius: 8px !important;
+        color: #EF4444 !important;
+        font-weight: 800 !important;
+        font-size: 0.88rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.35rem !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        max-height: 42px !important;
+        padding: 0 0.85rem !important;
+        text-transform: uppercase !important;
+        user-select: none !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        width: 100% !important;
     }
 
     /* Standard Buttons */
@@ -588,6 +769,82 @@ def upload_to_temp(uploaded_file) -> Path:
         handle.close()
 
 
+@st.dialog("Edit Object Details")
+def edit_file_modal(service: FileService, record: dict[str, Any]) -> None:
+    """Dialog modal for editing a file's name (extension locked) and custom field note."""
+    rec_id = record["id"]
+    current_full_name = record.get("original_name") or ""
+    path_obj = Path(current_full_name)
+    current_stem = path_obj.stem
+    current_ext = path_obj.suffix  # e.g. ".webp"
+    current_desc = record.get("description") or ""
+
+    st.markdown(
+        """
+        <div style="font-size: 0.88rem; color: #CBD5E1; line-height: 1.5; font-weight: 500; margin-bottom: 1.15rem; margin-top: -0.25rem;">
+            Rename the object or update its custom field note / metadata. The file extension is locked and preserved automatically.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        '<div style="font-size: 0.88rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.4rem;">File Name</div>',
+        unsafe_allow_html=True,
+    )
+    name_col, ext_col = st.columns([3.8, 1.2], vertical_alignment="center")
+    with name_col:
+        new_stem = st.text_input(
+            "File Name Stem",
+            value=current_stem,
+            placeholder="Enter file name...",
+            label_visibility="collapsed",
+            key=f"modal_stem_{rec_id}",
+        )
+    with ext_col:
+        ext_display = current_ext if current_ext else "—"
+        st.markdown(
+            f'<div class="modal-locked-ext" title="Extension locked: {escape(ext_display)}">🔒 {escape(ext_display)}</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        '<div style="font-size: 0.88rem; font-weight: 700; color: #FFFFFF; margin-top: 0.9rem; margin-bottom: 0.4rem;">Field Note / Description</div>',
+        unsafe_allow_html=True,
+    )
+    new_desc = st.text_area(
+        "Field Note / Description",
+        value=current_desc,
+        placeholder="Enter custom metadata, notes, or tags...",
+        label_visibility="collapsed",
+        key=f"modal_desc_{rec_id}",
+        height=110,
+    )
+
+    btn_col1, btn_col2 = st.columns([1, 1])
+    with btn_col1:
+        if st.button("Save Changes", type="primary", use_container_width=True, key=f"modal_save_{rec_id}"):
+            clean_stem = new_stem.strip()
+            if not clean_stem:
+                st.error("File name cannot be empty.")
+                return
+            # Automatically preserve and attach the locked extension
+            full_filename = f"{clean_stem}{current_ext}"
+            try:
+                service.update_metadata(
+                    rec_id,
+                    original_name=full_filename,
+                    description=new_desc.strip() or None,
+                )
+                st.toast("Object details updated successfully!", icon="⚡")
+                st.rerun()
+            except Exception as exc:
+                st.error(f"Failed to update: {exc}")
+    with btn_col2:
+        if st.button("Cancel", use_container_width=True, key=f"modal_cancel_{rec_id}"):
+            st.rerun()
+
+
 def render_upload_panel(service: FileService) -> None:
     """Render a compact, always-visible ingest surface."""
     with st.container(key="ingest_panel"):
@@ -609,11 +866,27 @@ def render_upload_panel(service: FileService) -> None:
         if uploaded_file is None:
             return
 
-        note_col, action_col = st.columns([5, 1.2], vertical_alignment="bottom")
+        file_stem = Path(uploaded_file.name).stem
+        file_ext = Path(uploaded_file.name).suffix
+
+        name_col, ext_col, note_col, action_col = st.columns([2.3, 0.9, 3.2, 1.4], vertical_alignment="bottom")
+        with name_col:
+            file_name_stem = st.text_input(
+                "File name stem",
+                value=file_stem,
+                placeholder="File name",
+                label_visibility="collapsed",
+            )
+        with ext_col:
+            ext_display = file_ext if file_ext else "—"
+            st.markdown(
+                f'<div class="modal-locked-ext" style="height: 38px; font-size: 0.82rem;" title="Extension locked: {escape(ext_display)}">🔒 {escape(ext_display)}</div>',
+                unsafe_allow_html=True,
+            )
         with note_col:
             file_note = st.text_input(
                 "Field note",
-                placeholder="Add description or metadata notes (optional)",
+                placeholder="Add description or field note (optional)",
                 label_visibility="collapsed",
             )
         with action_col:
@@ -624,10 +897,16 @@ def render_upload_panel(service: FileService) -> None:
                 st.error(f"File exceeds {human_size(service.settings.max_file_size_bytes)}.")
                 return
 
+            clean_stem = file_name_stem.strip() or file_stem
+            custom_name = f"{clean_stem}{file_ext}"
             temp_path = upload_to_temp(uploaded_file)
             try:
                 with st.spinner("Ingesting to Supabase Storage…"):
-                    service.create_file(str(temp_path), description=file_note.strip() or None)
+                    service.create_file(
+                        str(temp_path),
+                        description=file_note.strip() or None,
+                        original_name=custom_name,
+                    )
                 st.toast("Object ingested successfully.", icon="⚡")
                 st.rerun()
             except Exception as error:
@@ -805,7 +1084,9 @@ def main() -> None:
             with cols[3]:
                 action_popover = st.popover("⋮", use_container_width=True)
                 with action_popover:
-                    # Clean 2-Option Context Menu: Download & Delete
+                    if st.button("Edit Details", key=f"edit_btn_{rec_id}", use_container_width=True):
+                        edit_file_modal(service, r)
+
                     try:
                         signed_url = service.create_signed_url(rec_id)
                         st.link_button("Download", signed_url, use_container_width=True)
@@ -840,3 +1121,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
