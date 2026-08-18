@@ -1,0 +1,4 @@
+project_id = "field-notes-vault"
+
+[functions.validate-upload]
+verify_jwt = false

@@ -1,0 +1,8 @@
+{
+  "name": "supabase-file-crud",
+  "private": true,
+  "description": "Supabase CLI tooling for the Python file CRUD project",
+  "devDependencies": {
+    "supabase": "latest"
+  }
+}

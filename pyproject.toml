@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "supabase-file-crud"
+version = "1.0.0"
+description = "Terminal CRUD application for Supabase Storage files and Postgres metadata"
+requires-python = ">=3.10"
+dependencies = [
+    "supabase>=2.27,<3",
+    "python-dotenv>=1.0,<2",
+    "streamlit>=1.40,<2",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0,<9"]
+
+[project.scripts]
+supabase-files = "supabase_crud.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
