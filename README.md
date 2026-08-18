@@ -127,9 +127,9 @@ After `pip install -e .`, the equivalent command is `supabase-files`:
 supabase-files list
 ```
 
-## Tideframe frontend
+## StorageDocker frontend
 
-The project also includes a minimal Streamlit interface called **Tideframe**. It uses a warm archival-ledger visual system with numbered ingest and register sections, a compact upload well, neutral status text, and short-lived signed download links. The composition is intentionally distinct from a conventional blue SaaS file manager while keeping the workflow immediately understandable.
+The project includes a minimal, modern Streamlit web interface called **StorageDocker**. It features a clean dark obsidian design with crimson accents, official Supabase storage integration, realtime storage metrics, a drag-and-drop ingestion well, search filtering, and short-lived signed download links.
 
 ![StorageDocker UI preview](frontend/ui.PNG)
 
