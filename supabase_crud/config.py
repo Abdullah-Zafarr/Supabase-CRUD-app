@@ -12,6 +12,19 @@ class ConfigurationError(RuntimeError):
     """Raised when required configuration is missing or invalid."""
 
 
+def _get_val(name: str, default: str = "") -> str:
+    val = os.getenv(name, "").strip()
+    if not val:
+        try:
+            import streamlit as st
+
+            if name in st.secrets:
+                val = str(st.secrets[name]).strip()
+        except Exception:
+            pass
+    return val or default
+
+
 @dataclass(frozen=True)
 class Settings:
     supabase_url: str
@@ -26,22 +39,20 @@ class Settings:
     def from_env(cls) -> "Settings":
         load_dotenv()
 
-        url = os.getenv("SUPABASE_URL", "").strip()
-        # SUPABASE_KEY is supported as a convenient generic alias, while the
-        # documented name makes it clear that this is a server-side key.
+        url = _get_val("SUPABASE_URL")
         key = (
-            os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
-            or os.getenv("SUPABASE_SECRET_KEY", "").strip()
-            or os.getenv("SUPABASE_KEY", "").strip()
+            _get_val("SUPABASE_SERVICE_ROLE_KEY")
+            or _get_val("SUPABASE_SECRET_KEY")
+            or _get_val("SUPABASE_KEY")
         )
         if not url:
-            raise ConfigurationError("SUPABASE_URL is required. Copy it into .env.")
+            raise ConfigurationError("SUPABASE_URL is required. Copy it into .env or Streamlit Secrets.")
         if not key:
             raise ConfigurationError(
                 "SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_KEY) is required."
             )
 
-        raw_limit = os.getenv("MAX_FILE_SIZE_BYTES", str(10 * 1024 * 1024))
+        raw_limit = _get_val("MAX_FILE_SIZE_BYTES", str(10 * 1024 * 1024))
         try:
             max_file_size = int(raw_limit)
         except ValueError as exc:
@@ -52,13 +63,10 @@ class Settings:
         return cls(
             supabase_url=url.rstrip("/"),
             supabase_key=key,
-            bucket=os.getenv("SUPABASE_BUCKET", "documents").strip() or "documents",
-            edge_function_name=(
-                os.getenv("EDGE_FUNCTION_NAME", "validate-upload").strip()
-                or "validate-upload"
-            ),
-            edge_function_secret=os.getenv("EDGE_FUNCTION_SECRET", "").strip(),
-            app_user=os.getenv("APP_USER", "terminal-user").strip() or "terminal-user",
+            bucket=_get_val("SUPABASE_BUCKET", "documents") or "documents",
+            edge_function_name=_get_val("EDGE_FUNCTION_NAME", "validate-upload") or "validate-upload",
+            edge_function_secret=_get_val("EDGE_FUNCTION_SECRET"),
+            app_user=_get_val("APP_USER", "terminal-user") or "terminal-user",
             max_file_size_bytes=max_file_size,
         )
 
