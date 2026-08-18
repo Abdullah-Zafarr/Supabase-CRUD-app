@@ -1,11 +1,21 @@
-# Supabase File Storage + CRUD App with Python
+# Supabase File Vault (StorageDocker)
 
-![StorageDocker UI preview](frontend/ui.PNG)
+A modern, high-performance Supabase object storage and metadata management platform with a sleek Streamlit UI, Postgres CRUD, and automated Edge Function validation.
 
-A terminal-based internship project that stores files in Supabase Storage and keeps searchable metadata in Postgres. Every upload is sent through a Supabase Edge Function that validates the file on the server, calculates its size and SHA-256 checksum, and marks the metadata row active only after validation succeeds.
+![StorageDocker Main Dashboard](frontend/ui.PNG)
+
+### ✨ Key Features
+- **Object Ingestion & Custom Naming**: Upload files with custom display names and optional field notes/metadata.
+- **Extension Locking**: File extensions (e.g. `.png`, `.webp`, `.pdf`) are permanently locked (`🔒 .EXT`) to prevent file format corruption.
+- **Live Metadata Editing**: Rename files and update custom field notes / tags in real-time through an interactive modal.
+- **Edge Function Validation**: Automated server-side validation for file size, MIME type, signature checks, and SHA-256 checksums.
+- **Instant Secure Downloads**: Private signed URLs for authenticated, short-lived download links.
+
+![StorageDocker Edit Details Modal](frontend/edit%20details.PNG)
 
 ## What is included
 
+- Streamlit Web App (`StorageDocker`) with enterprise dark UI.
 - Python `supabase-py` CLI for Storage + Postgres CRUD.
 - Private `documents` Storage bucket with a 10 MB limit.
 - `public.file_records` table for filename, uploader label, MIME type, size, checksum, status, and timestamps.
