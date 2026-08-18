@@ -1,4 +1,4 @@
-project_id = "field-notes-vault"
+project_id = "mzldiecgtgjyknjmtsxz"
 
 [functions.validate-upload]
 verify_jwt = false
