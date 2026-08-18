@@ -12,5 +12,5 @@ dist/
 build/
 *.egg-info/
 .supabase/
+supabase/.temp/
 node_modules/
-
