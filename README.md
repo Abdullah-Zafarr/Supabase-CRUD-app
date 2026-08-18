@@ -1,5 +1,7 @@
 # Supabase File Storage + CRUD App with Python
 
+![StorageDocker UI preview](frontend/ui.PNG)
+
 A terminal-based internship project that stores files in Supabase Storage and keeps searchable metadata in Postgres. Every upload is sent through a Supabase Edge Function that validates the file on the server, calculates its size and SHA-256 checksum, and marks the metadata row active only after validation succeeds.
 
 ## What is included
