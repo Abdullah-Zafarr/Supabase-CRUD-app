@@ -1,0 +1,11 @@
+{
+  "project": "Supabase File Storage + CRUD",
+  "version": "1.0.0",
+  "status": "validated",
+  "features": [
+    "Storage CRUD",
+    "Postgres Metadata",
+    "Server-side Edge Function Validation",
+    "Streamlit UI"
+  ]
+}

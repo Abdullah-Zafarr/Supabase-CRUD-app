@@ -6,6 +6,16 @@ import json
 from pathlib import Path
 from typing import Any
 
+# Use the operating system trust store when available. This keeps TLS
+# verification enabled on Windows machines whose organization/root CA is not
+# included in certifi's bundled CA file.
+try:
+    import truststore
+
+    truststore.inject_into_ssl()
+except (ImportError, NotImplementedError):
+    pass
+
 from supabase import Client, create_client
 
 from .config import ConfigurationError, Settings
@@ -43,25 +53,27 @@ class FileService:
         return rows[0]
 
     def _insert_record(self, values: dict[str, Any]) -> dict[str, Any]:
-        response = (
-            self.client.table(TABLE_NAME)
-            .insert(values)
-            .select("*")
-            .single()
-            .execute()
-        )
-        return response.data
+        response = self.client.table(TABLE_NAME).insert(values).execute()
+        data = response.data
+        if isinstance(data, list):
+            if not data:
+                raise RuntimeError("Failed to insert record into database.")
+            return data[0]
+        return data
 
     def _update_record(self, record_id: str, values: dict[str, Any]) -> dict[str, Any]:
         response = (
             self.client.table(TABLE_NAME)
             .update(values)
             .eq("id", record_id)
-            .select("*")
-            .single()
             .execute()
         )
-        return response.data
+        data = response.data
+        if isinstance(data, list):
+            if not data:
+                raise RuntimeError(f"Failed to update record with id {record_id}.")
+            return data[0]
+        return data
 
     def _delete_record(self, record_id: str) -> None:
         self.client.table(TABLE_NAME).delete().eq("id", record_id).execute()

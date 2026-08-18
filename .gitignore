@@ -14,3 +14,4 @@ build/
 .supabase/
 supabase/.temp/
 node_modules/
+downloads/

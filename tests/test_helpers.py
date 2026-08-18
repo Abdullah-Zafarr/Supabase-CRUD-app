@@ -27,6 +27,7 @@ def test_storage_path_rejects_traversal_and_absolute_paths():
 
 def test_content_type_and_human_size():
     assert content_type_for(Path("notes.txt")) == "text/plain"
+    assert content_type_for(Path("records.csv")) == "text/csv"
+    assert content_type_for(Path("metadata.json")) == "application/json"
     assert human_size(1024 * 1024) == "1.0 MB"
     assert human_size(None) == "unknown"
-

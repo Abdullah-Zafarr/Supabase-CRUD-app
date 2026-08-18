@@ -8,9 +8,25 @@ from pathlib import Path
 from uuid import uuid4
 
 
+KNOWN_MIME_TYPES = {
+    ".csv": "text/csv",
+    ".json": "application/json",
+    ".txt": "text/plain",
+    ".pdf": "application/pdf",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+}
+
+
 def content_type_for(path: Path) -> str:
     """Return a useful upload content type, with a safe binary fallback."""
 
+    ext = path.suffix.lower()
+    if ext in KNOWN_MIME_TYPES:
+        return KNOWN_MIME_TYPES[ext]
     return mimetypes.guess_type(path.name)[0] or "application/octet-stream"
 
 
