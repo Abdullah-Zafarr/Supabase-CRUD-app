@@ -432,6 +432,136 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Final layout layer: centered, calm, and deliberately sparse.
+st.markdown(
+    """
+    <style>
+    :root {
+        --canvas: #F5F3ED;
+        --surface: #FCFBF7;
+        --border: #D6D8D2;
+        --text-strong: #17363D;
+        --text-body: #52686C;
+        --text-dim: #829092;
+        --ocean: #173F49;
+        --signal: #D96845;
+    }
+
+    .stApp { background: var(--canvas) !important; }
+
+    [data-testid="stMainBlockContainer"],
+    .main .block-container {
+        width: calc(100% - 3rem) !important;
+        max-width: 1180px !important;
+        margin: 0 auto !important;
+        padding: 1.65rem 0 0.75rem !important;
+    }
+
+    [data-testid="stVerticalBlock"] { gap: 0.7rem !important; }
+
+    .brand-cluster { gap: 0.65rem; }
+    .brand-mark {
+        width: 25px;
+        height: 25px;
+        font-size: 0.57rem;
+        background: var(--ocean);
+    }
+    .brand-title { font-size: 0.92rem; font-weight: 650; }
+
+    .masthead {
+        padding: 1.15rem 0 0.15rem !important;
+        margin: 0 !important;
+    }
+    .masthead-title {
+        font-size: 2.5rem !important;
+        line-height: 1 !important;
+        letter-spacing: -0.055em !important;
+        font-weight: 580 !important;
+    }
+
+    [data-testid="stTextInputRootElement"] {
+        min-height: 2.55rem !important;
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 1px 0 rgba(23, 63, 73, 0.02) !important;
+    }
+    [data-testid="stTextInputRootElement"] input {
+        padding-left: 0.85rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    div[data-testid="stPopover"] button,
+    div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"] {
+        min-height: 2rem !important;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 6px !important;
+        color: var(--text-body) !important;
+        -webkit-text-fill-color: var(--text-body) !important;
+        box-shadow: none !important;
+        padding: 0.2rem 0.35rem !important;
+    }
+    div[data-testid="stPopover"] button svg { display: none !important; }
+
+    .st-key-new_file_control div[data-testid="stPopover"] button,
+    .st-key-new_file_control div[data-testid="stPopover"] button[data-testid="stBaseButton-secondary"] {
+        width: 100% !important;
+        min-height: 2.55rem !important;
+        background: var(--ocean) !important;
+        border: 1px solid var(--ocean) !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-family: 'Instrument Sans', sans-serif !important;
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+    }
+    .st-key-new_file_control div[data-testid="stPopover"] button:hover {
+        background: #24545D !important;
+        border-color: #24545D !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    .index-count {
+        padding: 0.3rem 0 0.15rem !important;
+        font-size: 0.58rem !important;
+        color: var(--text-dim) !important;
+    }
+
+    .list-wrapper { overflow: visible; }
+    .list-header {
+        grid-template-columns: 5.2fr 0.8fr 1.8fr 0.8fr 0.35fr;
+        padding: 0.58rem 0.65rem !important;
+        border-top: 1px solid var(--border) !important;
+        border-bottom: 1px solid var(--border) !important;
+        background: rgba(255, 255, 255, 0.28) !important;
+        color: var(--text-dim) !important;
+        font-size: 0.57rem !important;
+    }
+
+    .file-name-block { padding-left: 0.55rem; min-height: 2.55rem; }
+    .file-ext-icon {
+        width: 31px;
+        color: var(--text-dim);
+        font-size: 0.55rem;
+    }
+    .file-name-text { font-size: 0.8rem; font-weight: 600; }
+    .file-desc-sub { font-size: 0.67rem; }
+    .cell-mono { font-size: 0.64rem; }
+    .status-label { font-size: 0.59rem; }
+
+    @media (max-width: 780px) {
+        [data-testid="stMainBlockContainer"], .main .block-container {
+            width: calc(100% - 1.25rem) !important;
+        }
+        .masthead-title { font-size: 2rem !important; }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 @st.cache_resource
 def get_service() -> FileService:
@@ -460,7 +590,7 @@ def upload_to_temp(uploaded_file) -> Path:
 
 def render_upload_popover(service: FileService) -> None:
     """Render the complete create flow behind one quiet control."""
-    with st.popover("+", help="Add an object"):
+    with st.popover("New file"):
         uploaded_file = st.file_uploader(
             "File",
             type=["pdf", "png", "jpg", "jpeg", "webp", "gif", "txt", "csv", "json", "docx"],
@@ -506,7 +636,7 @@ def main() -> None:
     st.markdown(
         """
         <section class="masthead">
-            <div class="masthead-title">Archive.</div>
+            <div class="masthead-title">Files</div>
         </section>
         """,
         unsafe_allow_html=True,
@@ -514,7 +644,7 @@ def main() -> None:
 
     records = service.list_files()
 
-    search_col, add_col = st.columns([12, 0.55], vertical_alignment="center")
+    search_col, _, add_col = st.columns([4, 3, 1.15], vertical_alignment="center")
     with search_col:
         search = st.text_input(
             "Search",
@@ -522,7 +652,8 @@ def main() -> None:
             label_visibility="collapsed",
         ).strip().lower()
     with add_col:
-        render_upload_popover(service)
+        with st.container(key="new_file_control"):
+            render_upload_popover(service)
 
     filtered = sorted(records, key=lambda item: str(item.get("created_at") or ""), reverse=True)
     if search:
