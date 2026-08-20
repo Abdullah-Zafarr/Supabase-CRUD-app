@@ -1,6 +1,6 @@
 # Supabase File Vault (StorageDocker)
 
-A modern, high-performance Supabase object storage and metadata management platform with a sleek Streamlit UI, Postgres CRUD, and automated Edge Function validation.
+A modern, high-performance Supabase object storage and metadata management platform with a sleek Streamlit UI, Postgres CRUD, and automated Edge Function validation
 
 ![StorageDocker Main Dashboard](frontend/ui.PNG)
 
